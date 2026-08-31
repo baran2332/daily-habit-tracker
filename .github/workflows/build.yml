@@ -22,11 +22,23 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Prepare Web Assets
+      - name: Prepare Web Assets & Ensure index.html
         run: |
           mkdir -p www
-          shopt -s nocaseglob
-          cp *.html *.js www/ 2>/dev/null || true
+          # Tüm web dosyalarını bulup www içine taşı
+          find . -maxdepth 1 -type f \( -name "*.html" -o -name "*.js" -o -name "*.css" \) -exec cp {} www/ \;
+          
+          # Eğer index.html adı büyük harfle yazıldıysa düzelt
+          if [ -f www/Index.html ] && [ ! -f www/index.html ]; then
+            mv www/Index.html www/index.html
+          fi
+
+          # Eğer www içinde hiç index.html yoksa kök dizinden zorla kopyala
+          if [ ! -f www/index.html ]; then
+            cp index.html www/ 2>/dev/null || cp Index.html www/ 2>/dev/null || true
+          fi
+
+          # Kontrol için dosyaları listele
           ls -la www/
 
       - name: Initialize Project & Install Capacitor
