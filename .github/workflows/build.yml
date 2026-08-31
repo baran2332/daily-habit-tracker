@@ -31,10 +31,10 @@ jobs:
           cp -r *.html *.js *.css *.json assets 2>/dev/null || true
           cp -r * www/ 2>/dev/null || true
 
-      - name: Initialize Project & Install Capacitor with AdMob
+      - name: Initialize Project & Install Capacitor Plugins
         run: |
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor-community/admob
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor-community/admob @capacitor/local-notifications
 
       - name: Initialize Capacitor Config
         run: |
@@ -58,7 +58,7 @@ jobs:
                 try {
                   await AdMob.initialize({ requestTrackingAuthorization: true });
                   await AdMob.prepareInterstitial({
-                    adId: 'ca-app-pub-3940256099942544/1033173712', // Google Resmi Test Geçiş Reklamı ID
+                    adId: 'ca-app-pub-3940256099942544/1033173712',
                     isTesting: true
                   });
                   await AdMob.showInterstitial();
@@ -84,7 +84,7 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Inject AdMob App ID to AndroidManifest.xml
+      - name: Inject Permissions & Config to AndroidManifest.xml
         run: |
           cat << 'EOF' > inject_manifest.py
           import os
@@ -94,6 +94,7 @@ jobs:
               with open(manifest_path, "r", encoding="utf-8") as f:
                   content = f.read()
               
+              # AdMob Metadata
               admob_meta = """
               <meta-data
                   android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -101,8 +102,18 @@ jobs:
               """
               if "com.google.android.gms.ads.APPLICATION_ID" not in content:
                   content = content.replace("</application>", admob_meta + "\n</application>")
-                  with open(manifest_path, "w", encoding="utf-8") as f:
-                      f.write(content)
+
+              # Notification Permissions
+              notif_permissions = """
+              <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+              <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+              """
+              if "POST_NOTIFICATIONS" not in content:
+                  content = content.replace("</manifest>", notif_permissions + "\n</manifest>")
+
+              with open(manifest_path, "w", encoding="utf-8") as f:
+                  f.write(content)
           EOF
           python3 inject_manifest.py
 
@@ -135,13 +146,13 @@ jobs:
           chmod +x gradlew
           ./gradlew bundleRelease assembleDebug --no-daemon
 
-      - name: Upload APK Artifact (Test için)
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload AAB Artifact (Play Store için)
+      - name: Upload AAB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-bundle
