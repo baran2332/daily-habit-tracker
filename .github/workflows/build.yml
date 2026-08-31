@@ -22,14 +22,19 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Initialize Project and Install Capacitor
+      - name: Prepare Web Assets
+        run: |
+          mkdir -p www
+          cp index.html app.js translations.js www/ 2>/dev/null || cp index.html www/
+
+      - name: Initialize Project & Install Capacitor
         run: |
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      - name: Initialize Capacitor Project
+      - name: Initialize Capacitor Config
         run: |
-          npx cap init "Daily Tracker" "com.dailyhabit.tracker" --web-dir .
+          npx cap init "Daily Tracker" "com.dailyhabit.tracker" --web-dir www
 
       - name: Add Android Platform & Sync
         run: |
