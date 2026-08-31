@@ -40,7 +40,7 @@ jobs:
         run: |
           npx cap init "Daily Tracker" "com.dailyhabit.tracker" --web-dir www
 
-      - name: Inject AdMob Script to index.html
+      - name: Inject AdMob Script to index.html (If Ads Not Removed)
         run: |
           cat << 'EOF' > inject_admob.py
           import os
@@ -53,7 +53,8 @@ jobs:
               admob_script = """
           <script>
             document.addEventListener("DOMContentLoaded", async () => {
-              if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+              const adsRemoved = localStorage.getItem('adsRemoved') === 'true';
+              if (!adsRemoved && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
                 const { AdMob } = window.Capacitor.Plugins;
                 try {
                   await AdMob.initialize({ requestTrackingAuthorization: true });
@@ -94,7 +95,6 @@ jobs:
               with open(manifest_path, "r", encoding="utf-8") as f:
                   content = f.read()
               
-              # AdMob Metadata
               admob_meta = """
               <meta-data
                   android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -103,7 +103,6 @@ jobs:
               if "com.google.android.gms.ads.APPLICATION_ID" not in content:
                   content = content.replace("</application>", admob_meta + "\n</application>")
 
-              # Notification Permissions
               notif_permissions = """
               <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
               <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
