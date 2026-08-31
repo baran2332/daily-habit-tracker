@@ -25,7 +25,9 @@ jobs:
       - name: Prepare Web Assets
         run: |
           mkdir -p www
-          cp index.html app.js translations.js www/ 2>/dev/null || cp index.html www/
+          shopt -s nocaseglob
+          cp *.html *.js www/ 2>/dev/null || true
+          ls -la www/
 
       - name: Initialize Project & Install Capacitor
         run: |
