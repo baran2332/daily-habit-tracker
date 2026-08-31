@@ -1,55 +1,204 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daily Habit Tracker</title>
   <style>
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-    .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-    h1 { text-align: center; color: #2c3e50; font-size: 24px; margin-top: 0; }
+    :root {
+      --bg-color: #f4f6f8;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --subtext-color: #666666;
+      --border-color: #e0e0e0;
+      --primary-color: #2ecc71;
+      --accent-color: #3498db;
+      --danger-color: #e74c3c;
+      --banner-bg: #e9ecef;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #ffffff;
+      --subtext-color: #aaaaaa;
+      --border-color: #333333;
+      --primary-color: #27ae60;
+      --accent-color: #2980b9;
+      --danger-color: #c0392b;
+      --banner-bg: #2a2a2a;
+    }
+
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.3s, color 0.3s; }
+    body { background-color: var(--bg-color); margin: 0; padding: 15px; color: var(--text-color); }
+    .container { max-width: 550px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+    .header h1 { font-size: 20px; margin: 0; color: var(--text-color); }
+    .controls { display: flex; gap: 8px; }
+    
+    select, button { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); cursor: pointer; font-size: 13px; }
+    
+    .remove-ads-bar { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #000; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .remove-ads-btn { background: #000; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; }
+
     .form-group { margin-bottom: 15px; }
-    label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; }
-    input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: var(--subtext-color); }
+    input[type="text"] { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-color); font-size: 14px; }
+    
     .time-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-    .time-row input[type="time"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
-    .remove-time-btn { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-    .add-time-btn { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%; margin-top: 5px; }
-    .submit-btn { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-    .habit-card { background: #f8f9fa; border-left: 4px solid #2ecc71; padding: 12px; margin-top: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-    .habit-title { font-weight: bold; }
-    .habit-times { font-size: 12px; color: #666; }
+    .time-row input[type="time"] { flex: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--card-bg); color: var(--text-color); }
+    .remove-time-btn { background: var(--danger-color); color: white; border: none; padding: 8px 12px; border-radius: 6px; }
+    .add-time-btn { background: var(--accent-color); color: white; border: none; width: 100%; padding: 8px; border-radius: 6px; margin-top: 4px; font-weight: 500; }
+    
+    .submit-btn { background: var(--primary-color); color: white; border: none; width: 100%; padding: 12px; font-size: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+
+    .habit-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--primary-color); padding: 12px; margin-top: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .habit-title { font-weight: bold; font-size: 15px; }
+    .habit-times { font-size: 12px; color: var(--subtext-color); margin-top: 3px; }
+
+    /* Banner Reklam Alanı Simülasyonu */
+    .ad-banner-area { background: var(--banner-bg); border: 1px dashed var(--border-color); border-radius: 8px; padding: 15px; text-align: center; font-size: 12px; color: var(--subtext-color); margin-top: 20px; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Daily Habit Tracker</h1>
+  <div class="header">
+    <h1 id="txt-app-title">Daily Habit Tracker</h1>
+    <div class="controls">
+      <select id="langSelect" onchange="changeLanguage(this.value)">
+        <option value="tr">TR</option>
+        <option value="en">EN</option>
+        <option value="fr">FR</option>
+      </select>
+      <button onclick="toggleTheme()" id="themeBtn">🌙</button>
+    </div>
+  </div>
 
-  <div class="form-group">
-    <label for="habitName">Etkinlik / Alışkanlık Adı</label>
-    <input type="text" id="habitName" placeholder="Örn: Kitap Oku, Su İç">
+  <!-- Reklam Kaldırma Alanı -->
+  <div class="remove-ads-bar" id="removeAdsBar">
+    <span id="txt-remove-ads-label">Reklamları Kaldır ($0.99)</span>
+    <button class="remove-ads-btn" onclick="buyRemoveAds()" id="txt-buy-btn">Satın Al</button>
   </div>
 
   <div class="form-group">
-    <label>Hatırlatma Saatleri (Çoklu Seçim)</label>
+    <label id="txt-label-habit">Etkinlik / Alışkanlık Adı</label>
+    <input type="text" id="habitName" placeholder="...">
+  </div>
+
+  <div class="form-group">
+    <label id="txt-label-times">Hatırlatma Saatleri (Çoklu Seçim)</label>
     <div id="timeList">
       <div class="time-row">
         <input type="time" class="habit-time-input" value="09:00">
       </div>
     </div>
-    <button type="button" class="add-time-btn" onclick="addTimeSlot()">+ Başka Saat Ekle</button>
+    <button type="button" class="add-time-btn" onclick="addTimeSlot()" id="txt-add-time-btn">+ Başka Saat Ekle</button>
   </div>
 
-  <button type="button" class="submit-btn" onclick="saveHabit()">Etkinliği ve Bildirimleri Kaydet</button>
+  <button type="button" class="submit-btn" onclick="saveHabit()" id="txt-save-btn">Etkinliği Kaydet</button>
 
-  <h3 style="margin-top: 25px;">Kayıtlı Etkinlikler</h3>
+  <h3 style="margin-top: 25px; font-size: 16px;" id="txt-title-habits">Kayıtlı Etkinlikler</h3>
   <div id="habitList"></div>
+
+  <!-- Alt Banner Reklam Alanı -->
+  <div class="ad-banner-area" id="adBannerArea">
+    📢 <span id="txt-ad-placeholder">Sponsorlu Reklam Alanı (AdMob Banner)</span>
+  </div>
 </div>
 
 <script>
-  // Saat Ekleme Butonu
+  let isAdsRemoved = localStorage.getItem('adsRemoved') === 'true';
+
+  const translations = {
+    tr: {
+      appTitle: "Günlük Takipçi",
+      removeAdsLabel: "Reklamları Kaldır ($0.99)",
+      buyBtn: "Satın Al",
+      labelHabit: "Etkinlik / Alışkanlık Adı",
+      labelTimes: "Hatırlatma Saatleri (Çoklu Seçim)",
+      addTimeBtn: "+ Başka Saat Ekle",
+      saveBtn: "Etkinliği Kaydet",
+      titleHabits: "Kayıtlı Etkinlikler",
+      adPlaceholder: "Sponsorlu Reklam Alanı (AdMob Banner)",
+      placeholderInput: "Örn: Kitap Oku, Spor Yap",
+      alertEmptyName: "Lütfen etkinlik adı girin.",
+      alertEmptyTime: "Lütfen en az bir saat seçin.",
+      alertSuccess: "Etkinlik ve bildirimler başarıyla kaydedildi!",
+      adsPurchased: "Teşekkürler! Reklamlar başarıyla kaldırıldı."
+    },
+    en: {
+      appTitle: "Daily Habit Tracker",
+      removeAdsLabel: "Remove Ads ($0.99)",
+      buyBtn: "Buy Now",
+      labelHabit: "Habit / Task Name",
+      labelTimes: "Reminder Times (Multiple)",
+      addTimeBtn: "+ Add Another Time",
+      saveBtn: "Save Habit",
+      titleHabits: "Saved Habits",
+      adPlaceholder: "Sponsored Ad Space (AdMob Banner)",
+      placeholderInput: "E.g. Read Book, Exercise",
+      alertEmptyName: "Please enter a habit name.",
+      alertEmptyTime: "Please select at least one time slot.",
+      alertSuccess: "Habit and notifications set successfully!",
+      adsPurchased: "Thank you! Ads have been removed."
+    },
+    fr: {
+      appTitle: "Suivi Habitudes",
+      removeAdsLabel: "Supprimer les Pubs ($0.99)",
+      buyBtn: "Acheter",
+      labelHabit: "Nom de l'habitude",
+      labelTimes: "Heures de rappel (Multiples)",
+      addTimeBtn: "+ Ajouter une heure",
+      saveBtn: "Enregistrer",
+      titleHabits: "Habitudes Enregistrées",
+      adPlaceholder: "Espace Publicitaire (AdMob Banner)",
+      placeholderInput: "Ex: Lire un livre, Faire du sport",
+      alertEmptyName: "Veuillez entrer un nom d'habitude.",
+      alertEmptyTime: "Veuillez sélectionner au moins une heure.",
+      alertSuccess: "Habitude et notifications enregistrées avec succès!",
+      adsPurchased: "Merci! Les publicités ont été supprimées."
+    }
+  };
+
+  let currentLang = localStorage.getItem('appLang') || 'tr';
+
+  function applyLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('appLang', lang);
+    document.getElementById('langSelect').value = lang;
+    
+    const t = translations[lang];
+    document.getElementById('txt-app-title').innerText = t.appTitle;
+    document.getElementById('txt-remove-ads-label').innerText = t.removeAdsLabel;
+    document.getElementById('txt-buy-btn').innerText = t.buyBtn;
+    document.getElementById('txt-label-habit').innerText = t.labelHabit;
+    document.getElementById('txt-label-times').innerText = t.labelTimes;
+    document.getElementById('txt-add-time-btn').innerText = t.addTimeBtn;
+    document.getElementById('txt-save-btn').innerText = t.saveBtn;
+    document.getElementById('txt-title-habits').innerText = t.titleHabits;
+    document.getElementById('txt-ad-placeholder').innerText = t.adPlaceholder;
+    document.getElementById('habitName').placeholder = t.placeholderInput;
+  }
+
+  function changeLanguage(lang) { applyLanguage(lang); }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
+    document.getElementById('themeBtn').innerText = newTheme === 'light' ? '🌙' : '☀️';
+    localStorage.setItem('appTheme', newTheme);
+  }
+
+  function initTheme() {
+    const savedTheme = localStorage.getItem('appTheme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeBtn').innerText = savedTheme === 'light' ? '🌙' : '☀️';
+  }
+
   function addTimeSlot() {
     const container = document.getElementById('timeList');
     const div = document.createElement('div');
@@ -61,87 +210,80 @@
     container.appendChild(div);
   }
 
-  // Bildirim Kurma Fonksiyonu (Capacitor Local Notifications)
   async function scheduleNotification(title, timeStr) {
     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
       const { LocalNotifications } = window.Capacitor.Plugins;
-      
       try {
         await LocalNotifications.requestPermissions();
-
         const [hours, minutes] = timeStr.split(':').map(Number);
         const now = new Date();
         const scheduledDate = new Date();
         scheduledDate.setHours(hours, minutes, 0, 0);
-
-        // Eğer belirlenen saat geçmişse yarına kur
-        if (scheduledDate <= now) {
-          scheduledDate.setDate(scheduledDate.getDate() + 1);
-        }
-
-        const notifId = Math.floor(Math.random() * 1000000);
+        if (scheduledDate <= now) scheduledDate.setDate(scheduledDate.getDate() + 1);
 
         await LocalNotifications.schedule({
-          notifications: [
-            {
-              title: "Hatırlatıcı: " + title,
-              body: "Etkinlik saatiniz geldi!",
-              id: notifId,
-              schedule: { at: scheduledDate },
-              sound: null,
-              attachments: null,
-              actionTypeId: "",
-              extra: null
-            }
-          ]
+          notifications: [{
+            title: title,
+            body: timeStr + " - Etkinlik Zamanı!",
+            id: Math.floor(Math.random() * 1000000),
+            schedule: { at: scheduledDate }
+          }]
         });
-      } catch (err) {
-        console.log("Bildirim Hatası:", err);
-      }
+      } catch (err) { console.log("Notification Error:", err); }
     }
   }
 
-  // Etkinlik Kaydetme
   async function saveHabit() {
     const name = document.getElementById('habitName').value.trim();
-    if (!name) {
-      alert("Lütfen bir etkinlik adı girin.");
-      return;
-    }
+    const t = translations[currentLang];
+    if (!name) return alert(t.alertEmptyName);
 
     const timeInputs = document.querySelectorAll('.habit-time-input');
     const times = [];
-    
     for (let input of timeInputs) {
       if (input.value) {
         times.push(input.value);
         await scheduleNotification(name, input.value);
       }
     }
+    if (times.length === 0) return alert(t.alertEmptyTime);
 
-    if (times.length === 0) {
-      alert("Lütfen en az bir saat seçin.");
-      return;
-    }
-
-    // Ekran Listesine Ekle
     const habitList = document.getElementById('habitList');
     const card = document.createElement('div');
     card.className = 'habit-card';
     card.innerHTML = `
       <div>
         <div class="habit-title">${name}</div>
-        <div class="habit-times">Saatler: ${times.join(', ')}</div>
+        <div class="habit-times">⏰ ${times.join(', ')}</div>
       </div>
-      <span style="color: #2ecc71; font-weight: bold;">✓ Bildirim Kuruldu</span>
+      <span style="color: var(--primary-color); font-weight: bold;">✓</span>
     `;
     habitList.appendChild(card);
-
-    // Formu temizle
     document.getElementById('habitName').value = '';
-    alert("Etkinlik ve seçilen tüm saatler için bildirimler başarıyla ayarlandı!");
+    alert(t.alertSuccess);
   }
-</script>
 
+  function buyRemoveAds() {
+    const t = translations[currentLang];
+    // In-App Purchase logic / Simulation
+    localStorage.setItem('adsRemoved', 'true');
+    isAdsRemoved = true;
+    checkAdsStatus();
+    alert(t.adsPurchased);
+  }
+
+  function checkAdsStatus() {
+    if (isAdsRemoved) {
+      document.getElementById('removeAdsBar').style.display = 'none';
+      document.getElementById('adBannerArea').style.display = 'none';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    applyLanguage(currentLang);
+    checkAdsStatus();
+  });
+</script>
 </body>
 </html>
