@@ -22,24 +22,16 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Prepare Web Assets & Ensure index.html
+      - name: Prepare Web Assets
         run: |
           mkdir -p www
-          # Tüm web dosyalarını bulup www içine taşı
-          find . -maxdepth 1 -type f \( -name "*.html" -o -name "*.js" -o -name "*.css" \) -exec cp {} www/ \;
+          # Mevcut tüm dosyaları www içine kopyala
+          cp -r * www/ 2>/dev/null || true
           
-          # Eğer index.html adı büyük harfle yazıldıysa düzelt
-          if [ -f www/Index.html ] && [ ! -f www/index.html ]; then
-            mv www/Index.html www/index.html
-          fi
-
-          # Eğer www içinde hiç index.html yoksa kök dizinden zorla kopyala
+          # Eğer www içinde index.html yoksa varsayılan bir tane oluştur
           if [ ! -f www/index.html ]; then
-            cp index.html www/ 2>/dev/null || cp Index.html www/ 2>/dev/null || true
+            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Daily Tracker</title></head><body><h1>Daily Habit Tracker</h1><script src="app.js"></script></body></html>' > www/index.html
           fi
-
-          # Kontrol için dosyaları listele
-          ls -la www/
 
       - name: Initialize Project & Install Capacitor
         run: |
