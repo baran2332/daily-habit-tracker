@@ -1,4 +1,4 @@
-name: Build Android AAB
+name: Build Android AAB and APK
 
 on:
   push:
@@ -67,13 +67,19 @@ jobs:
           EOF
           python3 fix_gradle.py
 
-      - name: Build Android Release Bundle (AAB)
+      - name: Build Android Release Bundle (AAB) & APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew bundleRelease --no-daemon
+          ./gradlew bundleRelease assembleDebug --no-daemon
 
-      - name: Upload AAB Artifact
+      - name: Upload APK Artifact (Test için)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload AAB Artifact (Play Store için)
         uses: actions/upload-artifact@v4
         with:
           name: app-release-bundle
