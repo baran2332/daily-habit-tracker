@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Habit Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.3s, color 0.3s; }
+    body { background-color: #f3f4f6; color: #1f2937; padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
+    
+    /* Koyu Mod Stilleri */
+    body.dark-mode { background-color: #111827; color: #f9fafb; }
+    body.dark-mode .app-card { background: #1f2937; border-color: #374151; box-shadow: none; }
+    body.dark-mode select, body.dark-mode input { background: #374151; color: #fff; border-color: #4b5563; }
+    body.dark-mode li { background: #374151; border-color: #4b5563; color: #fff; }
+    body.dark-mode .quick-chip { background: #374151; border-color: #4b5563; color: #fff; }
+    body.dark-mode .ad-box { background: #374151; color: #9ca3af; }
+    
+    .app-card { background: #ffffff; width: 100%; max-width: 420px; border-radius: 16px; padding: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); height: fit-content; display: flex; flex-direction: column; gap: 14px; border: 1px solid #e5e7eb; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
+    h1 { font-size: 1.25rem; font-weight: 700; color: #4f46e5; }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+    select { background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 8px; font-size: 0.8rem; font-weight: 600; }
+    .btn-theme { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+    
+    /* İlerleme Çubuğu & Rozet */
+    .progress-section { background: #f9fafb; padding: 10px; border-radius: 12px; border: 1px solid #f3f4f6; }
+    body.dark-mode .progress-section { background: #374151; border-color: #4b5563; }
+    .progress-header { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; margin-bottom: 6px; }
+    .progress-bar-bg { background: #e5e7eb; height: 10px; border-radius: 5px; overflow: hidden; }
+    .progress-bar-fill { background: #10b981; height: 100%; width: 0%; transition: width 0.4s ease; }
+    .badge-container { display: none; margin-top: 8px; text-align: center; font-size: 0.75rem; font-weight: 800; color: #f59e0b; background: #fffbeb; padding: 4px; border-radius: 6px; }
+
+    .pro-box { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .pro-text { font-size: 0.75rem; font-weight: 700; color: #4338ca; }
+    .btn-pro { background: #4f46e5; color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+    
+    .section-title { font-size: 0.8rem; font-weight: 700; color: #6b7280; }
+    .quick-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+    .quick-chip { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 20px; padding: 5px 10px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+    .btn-plus { background: #4f46e5; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; }
+    
+    .input-group { display: flex; gap: 6px; }
+    input[type="text"] { flex: 1; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px; font-size: 0.85rem; outline: none; }
+    input[type="time"] { border: 1px solid #d1d5db; border-radius: 8px; padding: 6px; font-size: 0.8rem; outline: none; }
+    .btn-add { background: #4f46e5; color: white; border: none; border-radius: 8px; padding: 0 12px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+    
+    .btn-notify { background: #10b981; color: white; border: none; border-radius: 8px; padding: 8px; font-size: 0.75rem; font-weight: 700; width: 100%; cursor: pointer; }
+    
+    ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    li { background: #f9fafb; border: 1px solid #f3f4f6; padding: 10px 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .habit-left { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+    .time-tag { font-size: 0.7rem; color: #6b7280; background: #e5e7eb; padding: 2px 4px; border-radius: 4px; }
+    .streak-badge { font-size: 0.75rem; font-weight: 700; color: #d97706; background: #fffbeb; padding: 3px 6px; border-radius: 6px; }
+    .btn-del { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+    
+    .backup-row { display: flex; justify-content: space-between; gap: 8px; }
+    .btn-sec { background: #6b7280; color: white; border: none; border-radius: 6px; padding: 6px; font-size: 0.7rem; font-weight: 600; flex: 1; cursor: pointer; }
+    
+    .ad-box { background: #e5e7eb; border-radius: 8px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <div class="app-card">
+    <header>
+      <h1 id="app-title">Daily Tracker</h1>
+      <div class="header-right">
+        <button id="theme-toggle" class="btn-theme">🌙</button>
+        <select id="lang-select">
+          <option value="en">🇬🇧 EN</option>
+          <option value="tr">🇹🇷 TR</option>
+          <option value="es">🇪🇸 ES</option>
+          <option value="fr">🇫🇷 FR</option>
+          <option value="de">🇩🇪 DE</option>
+          <option value="it">🇮🇹 IT</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- İlerleme Çubuğu ve Rozet -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <span id="progress-title">Today's Progress</span>
+        <span id="progress-text">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="progress-fill" class="progress-bar-fill"></div>
+      </div>
+      <div id="badge-master" class="badge-container">
+        Habit Master 🏆
+      </div>
+    </div>
+
+    <!-- PRO / Reklam Kaldırma -->
+    <div id="pro-banner" class="pro-box">
+      <span class="pro-text" id="pro-status">Abonelik Yönetimi</span>
+      <button id="buy-pro-btn" class="btn-pro">Remove Ads ($0.99/mo)</button>
+    </div>
+
+    <button id="btn-notify" class="btn-notify">Enable Notifications 🔔</button>
+
+    <!-- Hızlı Ekleme -->
+    <div>
+      <div class="section-title" id="quick-add-title">Quick Add Habits</div>
+      <div class="quick-list">
+        <div class="quick-chip">
+          <span id="quick-water">Drink Water 💧</span>
+          <button class="btn-plus" onclick="addQuickHabit('water')">+</button>
+        </div>
+        <div class="quick-chip">
+          <span id="quick-book">Read Book 📚</span>
+          <button class="btn-plus" onclick="addQuickHabit('book')">+</button>
+        </div>
+        <div class="quick-chip">
+          <span id="quick-exercise">Exercise 🏃‍♂️</span>
+          <button class="btn-plus" onclick="addQuickHabit('exercise')">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Özel Alışkanlık -->
+    <div class="input-group">
+      <input type="text" id="habit-input" placeholder="Enter custom habit...">
+      <input type="time" id="habit-time">
+      <button id="add-btn" class="btn-add">Add</button>
+    </div>
+
+    <!-- Liste -->
+    <ul id="habit-list"></ul>
+
+    <!-- Veri Yedekleme / Yükleme -->
+    <div class="backup-row">
+      <button id="btn-export" class="btn-sec">Backup 💾</button>
+      <button id="btn-import" class="btn-sec">Restore 📂</button>
+      <input type="file" id="import-file" style="display: none;" accept=".json">
+    </div>
+
+    <!-- Reklam Alanı -->
+    <div id="ad-container" class="ad-box">
+      [ AdMob Banner Area ]
+    </div>
+  </div>
+
+  <script src="translations.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
