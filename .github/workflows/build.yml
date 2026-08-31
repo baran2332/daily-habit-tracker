@@ -25,24 +25,86 @@ jobs:
       - name: Prepare Web Assets
         run: |
           mkdir -p www
+          if [ -d "public" ]; then cp -r public/* www/ 2>/dev/null || true; fi
+          if [ -d "dist" ]; then cp -r dist/* www/ 2>/dev/null || true; fi
+          if [ -d "build" ]; then cp -r build/* www/ 2>/dev/null || true; fi
+          cp -r *.html *.js *.css *.json assets 2>/dev/null || true
           cp -r * www/ 2>/dev/null || true
-          if [ ! -f www/index.html ]; then
-            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Daily Tracker</title></head><body><h1>Daily Habit Tracker</h1><script src="app.js"></script></body></html>' > www/index.html
-          fi
 
-      - name: Initialize Project & Install Capacitor
+      - name: Initialize Project & Install Capacitor with AdMob
         run: |
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor-community/admob
 
       - name: Initialize Capacitor Config
         run: |
           npx cap init "Daily Tracker" "com.dailyhabit.tracker" --web-dir www
 
+      - name: Inject AdMob Script to index.html
+        run: |
+          cat << 'EOF' > inject_admob.py
+          import os
+
+          html_path = "www/index.html"
+          if os.path.exists(html_path):
+              with open(html_path, "r", encoding="utf-8") as f:
+                  content = f.read()
+              
+              admob_script = """
+          <script>
+            document.addEventListener("DOMContentLoaded", async () => {
+              if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+                const { AdMob } = window.Capacitor.Plugins;
+                try {
+                  await AdMob.initialize({ requestTrackingAuthorization: true });
+                  await AdMob.prepareInterstitial({
+                    adId: 'ca-app-pub-3940256099942544/1033173712', // Google Resmi Test Geçiş Reklamı ID
+                    isTesting: true
+                  });
+                  await AdMob.showInterstitial();
+                } catch (e) {
+                  console.log("AdMob Hatasi:", e);
+                }
+              }
+            });
+          </script>
+          """
+              if "</head>" in content:
+                  content = content.replace("</head>", admob_script + "\n</head>")
+              else:
+                  content = admob_script + content
+                  
+              with open(html_path, "w", encoding="utf-8") as f:
+                  f.write(content)
+          EOF
+          python3 inject_admob.py
+
       - name: Add Android Platform & Sync
         run: |
           npx cap add android
           npx cap sync android
+
+      - name: Inject AdMob App ID to AndroidManifest.xml
+        run: |
+          cat << 'EOF' > inject_manifest.py
+          import os
+
+          manifest_path = "android/app/src/main/AndroidManifest.xml"
+          if os.path.exists(manifest_path):
+              with open(manifest_path, "r", encoding="utf-8") as f:
+                  content = f.read()
+              
+              admob_meta = """
+              <meta-data
+                  android:name="com.google.android.gms.ads.APPLICATION_ID"
+                  android:value="ca-app-pub-3940256099942544~3347511713"/>
+              """
+              if "com.google.android.gms.ads.APPLICATION_ID" not in content:
+                  content = content.replace("</application>", admob_meta + "\n</application>")
+                  with open(manifest_path, "w", encoding="utf-8") as f:
+                      f.write(content)
+          EOF
+          python3 inject_manifest.py
 
       - name: Fix Kotlin Duplicate Classes Conflict
         run: |
