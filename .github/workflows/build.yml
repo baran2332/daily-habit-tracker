@@ -25,10 +25,7 @@ jobs:
       - name: Prepare Web Assets
         run: |
           mkdir -p www
-          # Mevcut tüm dosyaları www içine kopyala
           cp -r * www/ 2>/dev/null || true
-          
-          # Eğer www içinde index.html yoksa varsayılan bir tane oluştur
           if [ ! -f www/index.html ]; then
             echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Daily Tracker</title></head><body><h1>Daily Habit Tracker</h1><script src="app.js"></script></body></html>' > www/index.html
           fi
@@ -46,6 +43,29 @@ jobs:
         run: |
           npx cap add android
           npx cap sync android
+
+      - name: Fix Kotlin Duplicate Classes Conflict
+        run: |
+          cat << 'EOF' > fix_gradle.py
+          import os
+
+          gradle_path = "android/app/build.gradle"
+          if os.path.exists(gradle_path):
+              with open(gradle_path, "r") as f:
+                  content = f.read()
+              
+              fix_code = """
+          configurations.all {
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+          }
+          """
+              if "configurations.all" not in content:
+                  content += fix_code
+                  with open(gradle_path, "w") as f:
+                      f.write(content)
+          EOF
+          python3 fix_gradle.py
 
       - name: Build Android Release Bundle (AAB)
         run: |
