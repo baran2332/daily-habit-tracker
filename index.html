@@ -32,15 +32,15 @@
 
     <!-- Reklam Barı -->
     <div class="ad-bar" id="removeAdsBar">
-      <span>👑 <span id="txt-remove-ads">Reklamları Kaldır</span></span>
+      <span>👑 <span id="txt-remove-ads">Reklamları Kaldır ($0.99)</span></span>
       <button onclick="buyRemoveAds()" class="btn-xs" id="txt-buy">Satın Al</button>
     </div>
 
     <!-- HIZLI ÖRNEK RUTİNLER (KISAYOLLAR) -->
     <div class="quick-shortcuts">
-      <span class="quick-label"><i class="fa-solid fa-bolt"></i> Hızlı Kısayollar:</span>
-      <button type="button" class="quick-btn" onclick="addWaterRoutine()">💧 2 Saatte Bir Su (Gün Boyu)</button>
-      <button type="button" class="quick-btn" onclick="addMealRoutine()">🍲 5 Saatte Bir Yemek (Gün Boyu)</button>
+      <span class="quick-label"><i class="fa-solid fa-bolt"></i> <span id="txt-shortcuts-label">Hızlı Kısayollar:</span></span>
+      <button type="button" class="quick-btn" onclick="addWaterRoutine()" id="txt-btn-water">💧 2 Saatte Bir Su</button>
+      <button type="button" class="quick-btn" onclick="addMealRoutine()" id="txt-btn-meal">🍲 5 Saatte Bir Yemek</button>
     </div>
 
     <!-- HIZLI PLAN EKLEME FORMU -->
@@ -124,13 +124,18 @@
       title: "Pratik Planlayıcı",
       removeAds: "Reklamları Kaldır ($0.99)",
       buy: "Satın Al",
+      shortcutsLabel: "Hızlı Kısayollar:",
+      btnWater: "💧 2 Saatte Bir Su",
+      btnMeal: "🍲 5 Saatte Bir Yemek",
+      waterTitle: "💧 Su İç",
+      mealTitle: "🍲 Yemek Öğünü",
       optWeekly: "Haftalık Rutin",
       optDate: "Tarihli / Uzun Plan",
       placeholder: "Plan veya rutin adı...",
       addBtn: "+ Ekle",
       flowTitle: "Haftalık Görünüm",
       adText: "📢 Sponsorlu Reklam Alanı",
-      days: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
+      days: { 0: "Paz", 1: "Pzt", 2: "Sal", 3: "Çar", 4: "Per", 5: "Cum", 6: "Cmt" },
       emptyDay: "Plan yok",
       fillAlert: "Lütfen başlık ve gerekli alanları doldurun."
     },
@@ -138,15 +143,96 @@
       title: "Simple Planner",
       removeAds: "Remove Ads ($0.99)",
       buy: "Buy",
+      shortcutsLabel: "Quick Shortcuts:",
+      btnWater: "💧 Water Every 2 hrs",
+      btnMeal: "🍲 Meal Every 5 hrs",
+      waterTitle: "💧 Drink Water",
+      mealTitle: "🍲 Meal Time",
       optWeekly: "Weekly Routine",
       optDate: "Dated / Long Plan",
       placeholder: "Plan or routine name...",
       addBtn: "+ Add",
       flowTitle: "Weekly View",
       adText: "📢 Sponsored Ad Area",
-      days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      days: { 0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat" },
       emptyDay: "No plan",
       fillAlert: "Please fill in title and required fields."
+    },
+    fr: {
+      title: "Planificateur Simple",
+      removeAds: "Supprimer la pub ($0.99)",
+      buy: "Acheter",
+      shortcutsLabel: "Raccourcis Rapides:",
+      btnWater: "💧 Eau toutes les 2h",
+      btnMeal: "🍲 Repas tous les 5h",
+      waterTitle: "💧 Boire de l'eau",
+      mealTitle: "🍲 Repas",
+      optWeekly: "Routine Hebdo",
+      optDate: "Plan Daté / Long",
+      placeholder: "Nom du plan ou routine...",
+      addBtn: "+ Ajouter",
+      flowTitle: "Vue Hebdomadaire",
+      adText: "📢 Espace Publicitaire",
+      days: { 0: "Dim", 1: "Lun", 2: "Mar", 3: "Mer", 4: "Jeu", 5: "Ven", 6: "Sam" },
+      emptyDay: "Aucun plan",
+      fillAlert: "Veuillez remplir le titre et les champs requis."
+    },
+    de: {
+      title: "Einfacher Planer",
+      removeAds: "Werbung entfernen ($0.99)",
+      buy: "Kaufen",
+      shortcutsLabel: "Schnellzugriff:",
+      btnWater: "💧 Wasser alle 2 Std",
+      btnMeal: "🍲 Essen alle 5 Std",
+      waterTitle: "💧 Wasser trinken",
+      mealTitle: "🍲 Mahlzeit",
+      optWeekly: "Wochenroutine",
+      optDate: "Datierter Plan",
+      placeholder: "Plan- oder Routinenname...",
+      addBtn: "+ Hinzufügen",
+      flowTitle: "Wochenansicht",
+      adText: "📢 Werbebereich",
+      days: { 0: "So", 1: "Mo", 2: "Di", 3: "Mi", 4: "Do", 5: "Fr", 6: "Sa" },
+      emptyDay: "Kein Plan",
+      fillAlert: "Bitte füllen Sie den Titel und die erforderlichen Felder aus."
+    },
+    es: {
+      title: "Planificador Simple",
+      removeAds: "Eliminar Anuncios ($0.99)",
+      buy: "Comprar",
+      shortcutsLabel: "Atajos Rápidos:",
+      btnWater: "💧 Agua cada 2 horas",
+      btnMeal: "🍲 Comida cada 5 horas",
+      waterTitle: "💧 Beber agua",
+      mealTitle: "🍲 Comida",
+      optWeekly: "Rutina Semanal",
+      optDate: "Plan Fechado / Largo",
+      placeholder: "Nombre del plan o rutina...",
+      addBtn: "+ Añadir",
+      flowTitle: "Vista Semanal",
+      adText: "📢 Área de Anuncios",
+      days: { 0: "Dom", 1: "Lun", 2: "Mar", 3: "Mié", 4: "Jue", 5: "Vie", 6: "Sáb" },
+      emptyDay: "Sin plan",
+      fillAlert: "Por favor complete el título y los campos requeridos."
+    },
+    it: {
+      title: "Pianificatore Semplice",
+      removeAds: "Rimuovi Pubblicità ($0.99)",
+      buy: "Acquista",
+      shortcutsLabel: "Scorciatoie Rapide:",
+      btnWater: "💧 Acqua ogni 2 ore",
+      btnMeal: "🍲 Cibo ogni 5 ore",
+      waterTitle: "💧 Bevi acqua",
+      mealTitle: "🍲 Pasto",
+      optWeekly: "Routine Settimanale",
+      optDate: "Piano Datato / Lungo",
+      placeholder: "Nome del piano o routine...",
+      addBtn: "+ Aggiungi",
+      flowTitle: "Vista Settimanale",
+      adText: "📢 Spazio Pubblicitario",
+      days: { 0: "Dom", 1: "Lun", 2: "Mar", 3: "Mer", 4: "Gio", 5: "Ven", 6: "Sab" },
+      emptyDay: "Nessun piano",
+      fillAlert: "Si prega di compilare il titolo e i campi obbligatori."
     }
   };
 
@@ -167,6 +253,9 @@
     document.getElementById('txt-app-title').innerText = t.title;
     document.getElementById('txt-remove-ads').innerText = t.removeAds;
     document.getElementById('txt-buy').innerText = t.buy;
+    document.getElementById('txt-shortcuts-label').innerText = t.shortcutsLabel;
+    document.getElementById('txt-btn-water').innerText = t.btnWater;
+    document.getElementById('txt-btn-meal').innerText = t.btnMeal;
     document.getElementById('txt-opt-weekly').innerText = t.optWeekly;
     document.getElementById('txt-opt-date').innerText = t.optDate;
     document.getElementById('planTitle').placeholder = t.placeholder;
@@ -175,7 +264,8 @@
     document.getElementById('txt-ad-text').innerText = t.adText;
 
     document.querySelectorAll('.chip').forEach(chip => {
-      chip.innerText = t.days[parseInt(chip.getAttribute('data-day'))];
+      const dayVal = parseInt(chip.getAttribute('data-day'));
+      chip.innerText = t.days[dayVal];
     });
 
     renderWeeklyGrid();
@@ -210,13 +300,13 @@
 
   function toggleChip(btn) { btn.classList.toggle('active'); }
 
-  // 00:00'dan Başlayıp 2 Saatte Bir Su Ekleyen Kısayol
   function addWaterRoutine() {
+    const t = translations[currentLang] || translations['tr'];
     for (let hour = 0; hour < 24; hour += 2) {
       const timeStr = String(hour).padStart(2, '0') + ':00';
       weeklyRoutines.push({
         id: 'w_water_' + Date.now() + '_' + hour,
-        title: '💧 Su İç',
+        title: t.waterTitle,
         days: [1, 2, 3, 4, 5, 6, 0],
         time: timeStr
       });
@@ -225,13 +315,13 @@
     renderWeeklyGrid();
   }
 
-  // 00:00'dan Başlayıp 5 Saatte Bir Yemek Ekleyen Kısayol
   function addMealRoutine() {
+    const t = translations[currentLang] || translations['tr'];
     for (let hour = 0; hour < 24; hour += 5) {
       const timeStr = String(hour).padStart(2, '0') + ':00';
       weeklyRoutines.push({
         id: 'w_meal_' + Date.now() + '_' + hour,
-        title: '🍲 Yemek Öğünü',
+        title: t.mealTitle,
         days: [1, 2, 3, 4, 5, 6, 0],
         time: timeStr
       });
@@ -314,8 +404,9 @@
     let weekEnd = new Date(currentWeekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
 
+    const monthName = currentWeekStart.toLocaleString(currentLang, { month: 'short' });
     document.getElementById('currentWeekRange').innerText = 
-      `${currentWeekStart.getDate()} - ${weekEnd.getDate()} ${currentWeekStart.toLocaleString('default', { month: 'short' })}`;
+      `${currentWeekStart.getDate()} - ${weekEnd.getDate()} ${monthName}`;
 
     for (let i = 0; i < 7; i++) {
       let loopDate = new Date(currentWeekStart);
