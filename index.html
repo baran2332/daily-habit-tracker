@@ -3,115 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gelişmiş Plan & Rutin Takip</title>
+  <title>Pratik Planlayıcı</title>
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <div class="bg-glow blob-1"></div>
-  <div class="bg-glow blob-2"></div>
-
   <div class="container">
-    <!-- Üst Bar -->
-    <div class="header">
-      <div class="logo">
-        <i class="fa-solid fa-calendar-days"></i>
-        <span id="txt-app-title">Plan & Rutin Takip</span>
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span id="txt-app-title">Pratik Planlayıcı</span>
       </div>
-      <div class="controls">
-        <div class="language-selector">
-          <i class="fa-solid fa-globe"></i>
-          <select id="langSelect" onchange="changeLanguage(this.value)">
-            <option value="tr">Türkçe</option>
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-            <option value="de">Deutsch</option>
-            <option value="es">Español</option>
-            <option value="it">Italiano</option>
-          </select>
-        </div>
-        <button onclick="toggleTheme()" class="theme-btn" id="themeBtn">🌙</button>
+      <div class="header-actions">
+        <select id="langSelect" onchange="changeLanguage(this.value)" class="sm-select">
+          <option value="tr">TR</option>
+          <option value="en">EN</option>
+          <option value="fr">FR</option>
+          <option value="de">DE</option>
+          <option value="es">ES</option>
+          <option value="it">IT</option>
+        </select>
+        <button onclick="toggleTheme()" class="icon-btn" id="themeBtn">🌙</button>
       </div>
+    </header>
+
+    <!-- Reklam Barı (İsteğe Bağlı) -->
+    <div class="ad-bar" id="removeAdsBar">
+      <span>👑 <span id="txt-remove-ads">Reklamları Kaldır</span></span>
+      <button onclick="buyRemoveAds()" class="btn-xs" id="txt-buy">Satın Al</button>
     </div>
 
-    <!-- Reklam Barı -->
-    <div class="remove-ads-bar" id="removeAdsBar">
-      <span><i class="fa-solid fa-crown"></i> <span id="txt-remove-ads-label">Reklamları Kaldır ($0.99)</span></span>
-      <button class="remove-ads-btn" onclick="buyRemoveAds()" id="txt-buy-btn">Satın Al</button>
-    </div>
-
-    <!-- TAB / SEKMELER -->
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('weeklyTab')" id="btn-tab-weekly"><i class="fa-solid fa-arrows-rotate"></i> Haftalık Rutinler</button>
-      <button class="tab-btn" onclick="switchTab('dateTab')" id="btn-tab-date"><i class="fa-regular fa-calendar-plus"></i> Tarihli / Uzun Planlar</button>
-    </div>
-
-    <!-- TAB 1: HAFTALIK RUTİN EKLEME TABLOSU -->
-    <div id="weeklyTab" class="tab-content active">
-      <div class="card">
-        <div class="form-group">
-          <label id="txt-label-routine-name"><i class="fa-solid fa-pen"></i> Rutin Adı</label>
-          <input type="text" id="weeklyName" placeholder="Örn: Spor, Ders Çalışma, Kitap Oku">
-        </div>
-        <div class="form-group">
-          <label id="txt-label-select-days"><i class="fa-regular fa-calendar-check"></i> Haftalık Gün Seçimi</label>
-          <div class="days-grid">
-            <button type="button" class="day-chip" data-day="1" onclick="toggleDayChip(this)">Pzt</button>
-            <button type="button" class="day-chip" data-day="2" onclick="toggleDayChip(this)">Sal</button>
-            <button type="button" class="day-chip" data-day="3" onclick="toggleDayChip(this)">Çar</button>
-            <button type="button" class="day-chip" data-day="4" onclick="toggleDayChip(this)">Per</button>
-            <button type="button" class="day-chip" data-day="5" onclick="toggleDayChip(this)">Cum</button>
-            <button type="button" class="day-chip" data-day="6" onclick="toggleDayChip(this)">Cmt</button>
-            <button type="button" class="day-chip" data-day="0" onclick="toggleDayChip(this)">Paz</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label id="txt-label-routine-time"><i class="fa-regular fa-clock"></i> Saat</label>
-          <input type="time" id="weeklyTime" value="09:00">
-        </div>
-        <button type="button" class="btn btn-primary btn-block" onclick="saveWeeklyRoutine()" id="txt-save-weekly-btn">Haftalık Rutini Kaydet</button>
+    <!-- HIZLI PLAN EKLEME FORMU -->
+    <section class="card form-card">
+      <div class="type-selector">
+        <label class="radio-label">
+          <input type="radio" name="planType" value="weekly" checked onclick="toggleFormMode('weekly')">
+          <span id="txt-opt-weekly">Haftalık Rutin</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="planType" value="date" onclick="toggleFormMode('date')">
+          <span id="txt-opt-date">Tarihli / Uzun Plan</span>
+        </label>
       </div>
-    </div>
 
-    <!-- TAB 2: TARİHLİ / UZUN SÜRELİ PLAN TABLOSU -->
-    <div id="dateTab" class="tab-content">
-      <div class="card">
-        <div class="form-group">
-          <label id="txt-label-plan-name"><i class="fa-solid fa-pen"></i> Plan / Etkinlik Adı</label>
-          <input type="text" id="datePlanName" placeholder="Örn: Doktor Randevusu, Tatil Planı">
-        </div>
-        <div class="form-group date-row">
-          <div>
-            <label id="txt-label-start-date">Başlangıç Tarihi</label>
-            <input type="date" id="startDate">
-          </div>
-          <div>
-            <label id="txt-label-end-date">Bitiş Tarihi</label>
-            <input type="date" id="endDate">
-          </div>
-        </div>
-        <div class="form-group">
-          <label id="txt-label-plan-time"><i class="fa-regular fa-clock"></i> Saat</label>
-          <input type="time" id="datePlanTime" value="14:00">
-        </div>
-        <button type="button" class="btn btn-primary btn-block" onclick="saveDatePlan()" id="txt-save-date-btn">Tarihli Planı Kaydet</button>
+      <div class="input-group">
+        <input type="text" id="planTitle" placeholder="Plan veya rutin adı..." autofocus>
       </div>
-    </div>
 
-    <!-- BİRLEŞTİRİLMİŞ CANLI TAKVİM VE SAAT GÖRÜNÜMÜ -->
-    <div class="card timeline-card" style="margin-top: 20px;">
-      <div class="timeline-header">
-        <h3 id="txt-title-timeline"><i class="fa-solid fa-clock-rotations"></i> Günlük Akış</h3>
-        <input type="date" id="viewDate" onchange="renderCombinedView()">
+      <!-- HAFTALIK GÜN SEÇİMİ (Rutin Modu) -->
+      <div id="weeklyDaysArea" class="days-row">
+        <button type="button" class="chip" data-day="1" onclick="toggleChip(this)">Pzt</button>
+        <button type="button" class="chip" data-day="2" onclick="toggleChip(this)">Sal</button>
+        <button type="button" class="chip" data-day="3" onclick="toggleChip(this)">Çar</button>
+        <button type="button" class="chip" data-day="4" onclick="toggleChip(this)">Per</button>
+        <button type="button" class="chip" data-day="5" onclick="toggleChip(this)">Cum</button>
+        <button type="button" class="chip" data-day="6" onclick="toggleChip(this)">Cmt</button>
+        <button type="button" class="chip" data-day="0" onclick="toggleChip(this)">Paz</button>
       </div>
-      <div id="combinedTimelineList"></div>
-    </div>
 
-    <!-- Banner Reklam -->
-    <div class="ad-banner-area" id="adBannerArea">
-      📢 <span id="txt-ad-placeholder">Sponsorlu Reklam Alanı (AdMob Banner)</span>
+      <!-- TARİH ARALIĞI SEÇİMİ (Tarihli Mod) -->
+      <div id="dateRangeArea" class="dates-row" style="display: none;">
+        <input type="date" id="startDate">
+        <span>→</span>
+        <input type="date" id="endDate">
+      </div>
+
+      <div class="form-footer">
+        <div class="time-picker">
+          <i class="fa-regular fa-clock"></i>
+          <input type="time" id="planTime" value="09:00">
+        </div>
+        <button onclick="savePlan()" class="btn-primary" id="txt-add-btn">+ Ekle</button>
+      </div>
+    </section>
+
+    <!-- GÜNLÜK AKIŞ & BİRLEŞİK LİSTE -->
+    <section class="card flow-card">
+      <div class="flow-header">
+        <div class="flow-title">
+          <i class="fa-solid fa-list-ul"></i>
+          <span id="txt-flow-title">Günlük Akış</span>
+        </div>
+        <input type="date" id="viewDate" onchange="renderFlow()" class="date-picker-sm">
+      </div>
+
+      <div id="flowList" class="flow-list"></div>
+    </section>
+
+    <!-- AdMob Reklam Alanı -->
+    <div class="ad-placeholder" id="adBannerArea">
+      <span id="txt-ad-text">📢 Sponsorlu Reklam Alanı</span>
     </div>
   </div>
 
@@ -119,51 +103,36 @@
   let isAdsRemoved = localStorage.getItem('adsRemoved') === 'true';
   let weeklyRoutines = JSON.parse(localStorage.getItem('weeklyRoutines') || '[]');
   let datePlans = JSON.parse(localStorage.getItem('datePlans') || '[]');
+  let completedItems = JSON.parse(localStorage.getItem('completedItems') || '{}');
 
   const translations = {
     tr: {
-      appTitle: "Plan & Rutin Takip",
-      removeAdsLabel: "Reklamları Kaldır ($0.99)",
-      buyBtn: "Satın Al",
-      tabWeekly: "Haftalık Rutinler",
-      tabDate: "Tarihli / Uzun Planlar",
-      labelRoutineName: "Rutin Adı",
-      labelSelectDays: "Haftalık Gün Seçimi",
-      labelRoutineTime: "Saat",
-      saveWeeklyBtn: "Haftalık Rutini Kaydet",
-      labelPlanName: "Plan / Etkinlik Adı",
-      labelStartDate: "Başlangıç Tarihi",
-      labelEndDate: "Bitiş Tarihi",
-      labelPlanTime: "Saat",
-      saveDateBtn: "Tarihli Planı Kaydet",
-      titleTimeline: "Günlük Akış",
-      adPlaceholder: "Sponsorlu Reklam Alanı (AdMob Banner)",
-      daysShort: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
-      emptyTimeline: "Bu tarih için tanımlanmış bir rutin veya plan yok.",
-      alertFill: "Lütfen gerekli alanları doldurun.",
-      adsPurchased: "Teşekkürler! Reklamlar kaldırıldı."
+      title: "Pratik Planlayıcı",
+      removeAds: "Reklamları Kaldır ($0.99)",
+      buy: "Satın Al",
+      optWeekly: "Haftalık Rutin",
+      optDate: "Tarihli / Uzun Plan",
+      placeholder: "Plan veya rutin adı...",
+      addBtn: "+ Ekle",
+      flowTitle: "Günlük Akış",
+      adText: "📢 Sponsorlu Reklam Alanı",
+      days: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
+      empty: "Bu gün için henüz bir plan yok.",
+      fillAlert: "Lütfen başlık ve gerekli alanları doldurun."
     },
     en: {
-      appTitle: "Plan & Routine Tracker",
-      removeAdsLabel: "Remove Ads ($0.99)",
-      buyBtn: "Buy Now",
-      tabWeekly: "Weekly Routines",
-      tabDate: "Dated / Long Plans",
-      labelRoutineName: "Routine Name",
-      labelSelectDays: "Select Days of Week",
-      labelRoutineTime: "Time",
-      saveWeeklyBtn: "Save Weekly Routine",
-      labelPlanName: "Plan / Event Name",
-      labelStartDate: "Start Date",
-      labelEndDate: "End Date",
-      labelPlanTime: "Time",
-      saveDateBtn: "Save Dated Plan",
-      titleTimeline: "Daily Timeline",
-      adPlaceholder: "Sponsored Ad Space (AdMob Banner)",
-      daysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-      emptyTimeline: "No routines or plans set for this date.",
-      alertFill: "Please fill in all required fields.",
-      adsPurchased: "Thank you! Ads have been removed."
+      title: "Simple Planner",
+      removeAds: "Remove Ads ($0.99)",
+      buy: "Buy",
+      optWeekly: "Weekly Routine",
+      optDate: "Dated / Long Plan",
+      placeholder: "Plan or routine name...",
+      addBtn: "+ Add",
+      flowTitle: "Daily Flow",
+      adText: "📢 Sponsored Ad Area",
+      days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      empty: "No plans set for this day.",
+      fillAlert: "Please fill in title and required fields."
     }
   };
 
@@ -175,163 +144,162 @@
     document.getElementById('langSelect').value = lang;
     const t = translations[lang] || translations['tr'];
 
-    document.getElementById('txt-app-title').innerText = t.appTitle;
-    document.getElementById('txt-remove-ads-label').innerText = t.removeAdsLabel;
-    document.getElementById('txt-buy-btn').innerText = t.buyBtn;
-    document.getElementById('btn-tab-weekly').innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> ${t.tabWeekly}`;
-    document.getElementById('btn-tab-date').innerHTML = `<i class="fa-regular fa-calendar-plus"></i> ${t.tabDate}`;
-    document.getElementById('txt-label-routine-name').innerHTML = `<i class="fa-solid fa-pen"></i> ${t.labelRoutineName}`;
-    document.getElementById('txt-label-select-days').innerHTML = `<i class="fa-regular fa-calendar-check"></i> ${t.labelSelectDays}`;
-    document.getElementById('txt-label-routine-time').innerHTML = `<i class="fa-regular fa-clock"></i> ${t.labelRoutineTime}`;
-    document.getElementById('txt-save-weekly-btn').innerText = t.saveWeeklyBtn;
-    document.getElementById('txt-label-plan-name').innerHTML = `<i class="fa-solid fa-pen"></i> ${t.labelPlanName}`;
-    document.getElementById('txt-label-start-date').innerText = t.labelStartDate;
-    document.getElementById('txt-label-end-date').innerText = t.labelEndDate;
-    document.getElementById('txt-label-plan-time').innerHTML = `<i class="fa-regular fa-clock"></i> ${t.labelPlanTime}`;
-    document.getElementById('txt-save-date-btn').innerText = t.saveDateBtn;
-    document.getElementById('txt-title-timeline').innerHTML = `<i class="fa-solid fa-clock-rotations"></i> ${t.titleTimeline}`;
-    document.getElementById('txt-ad-placeholder').innerText = t.adPlaceholder;
+    document.getElementById('txt-app-title').innerText = t.title;
+    document.getElementById('txt-remove-ads').innerText = t.removeAds;
+    document.getElementById('txt-buy').innerText = t.buy;
+    document.getElementById('txt-opt-weekly').innerText = t.optWeekly;
+    document.getElementById('txt-opt-date').innerText = t.optDate;
+    document.getElementById('planTitle').placeholder = t.placeholder;
+    document.getElementById('txt-add-btn').innerText = t.addBtn;
+    document.getElementById('txt-flow-title').innerText = t.flowTitle;
+    document.getElementById('txt-ad-text').innerText = t.adText;
 
-    document.querySelectorAll('.day-chip').forEach(chip => {
-      chip.innerText = t.daysShort[parseInt(chip.getAttribute('data-day'))];
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.innerText = t.days[parseInt(chip.getAttribute('data-day'))];
     });
 
-    renderCombinedView();
+    renderFlow();
   }
 
   function changeLanguage(lang) { applyLanguage(lang); }
 
   function toggleTheme() {
     const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    html.setAttribute('data-theme', currentTheme);
-    document.getElementById('themeBtn').innerText = currentTheme === 'light' ? '🌙' : '☀️';
-    localStorage.setItem('appTheme', currentTheme);
+    const isLight = html.getAttribute('data-theme') === 'light';
+    const newTheme = isLight ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
+    document.getElementById('themeBtn').innerText = isLight ? '🌙' : '☀️';
+    localStorage.setItem('appTheme', newTheme);
   }
 
   function initTheme() {
-    const savedTheme = localStorage.getItem('appTheme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeBtn').innerText = savedTheme === 'light' ? '🌙' : '☀️';
+    const theme = localStorage.getItem('appTheme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeBtn').innerText = theme === 'light' ? '🌙' : '☀️';
   }
 
-  function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
-    if(tabId === 'weeklyTab') {
-      document.getElementById('btn-tab-weekly').classList.add('active');
+  function toggleFormMode(mode) {
+    if (mode === 'weekly') {
+      document.getElementById('weeklyDaysArea').style.display = 'flex';
+      document.getElementById('dateRangeArea').style.display = 'none';
     } else {
-      document.getElementById('btn-tab-date').classList.add('active');
+      document.getElementById('weeklyDaysArea').style.display = 'none';
+      document.getElementById('dateRangeArea').style.display = 'flex';
     }
-    document.getElementById(tabId).classList.add('active');
   }
 
-  function toggleDayChip(btn) { btn.classList.toggle('active'); }
+  function toggleChip(btn) { btn.classList.toggle('active'); }
 
-  function saveWeeklyRoutine() {
-    const name = document.getElementById('weeklyName').value.trim();
-    const time = document.getElementById('weeklyTime').value;
+  function savePlan() {
+    const mode = document.querySelector('input[name="planType"]:checked').value;
+    const title = document.getElementById('planTitle').value.trim();
+    const time = document.getElementById('planTime').value;
     const t = translations[currentLang] || translations['tr'];
 
-    let days = [];
-    document.querySelectorAll('#weeklyTab .day-chip.active').forEach(chip => {
-      days.push(parseInt(chip.getAttribute('data-day')));
-    });
+    if (!title || !time) return alert(t.fillAlert);
 
-    if (!name || days.length === 0 || !time) return alert(t.alertFill);
+    if (mode === 'weekly') {
+      let days = [];
+      document.querySelectorAll('.chip.active').forEach(c => days.push(parseInt(c.getAttribute('data-day'))));
+      if (days.length === 0) return alert(t.fillAlert);
 
-    weeklyRoutines.push({ id: Date.now(), name, days, time });
-    localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
+      weeklyRoutines.push({ id: 'w_' + Date.now(), title, days, time });
+      localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
+    } else {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      if (!startDate || !endDate) return alert(t.fillAlert);
 
-    document.getElementById('weeklyName').value = '';
-    document.querySelectorAll('#weeklyTab .day-chip').forEach(c => c.classList.remove('active'));
-    renderCombinedView();
+      datePlans.push({ id: 'd_' + Date.now(), title, startDate, endDate, time });
+      localStorage.setItem('datePlans', JSON.stringify(datePlans));
+    }
+
+    document.getElementById('planTitle').value = '';
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    renderFlow();
   }
 
-  function saveDatePlan() {
-    const name = document.getElementById('datePlanName').value.trim();
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const time = document.getElementById('datePlanTime').value;
-    const t = translations[currentLang] || translations['tr'];
-
-    if (!name || !startDate || !endDate || !time) return alert(t.alertFill);
-
-    datePlans.push({ id: Date.now(), name, startDate, endDate, time });
-    localStorage.setItem('datePlans', JSON.stringify(datePlans));
-
-    document.getElementById('datePlanName').value = '';
-    renderCombinedView();
+  function toggleDone(itemId) {
+    const viewDateVal = document.getElementById('viewDate').value;
+    const key = `${viewDateVal}_${itemId}`;
+    completedItems[key] = !completedItems[key];
+    localStorage.setItem('completedItems', JSON.stringify(completedItems));
+    renderFlow();
   }
 
   function deleteItem(type, id) {
-    if(type === 'weekly') {
+    if (type === 'weekly') {
       weeklyRoutines = weeklyRoutines.filter(r => r.id !== id);
       localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
     } else {
       datePlans = datePlans.filter(p => p.id !== id);
       localStorage.setItem('datePlans', JSON.stringify(datePlans));
     }
-    renderCombinedView();
+    renderFlow();
   }
 
-  function renderCombinedView() {
+  function renderFlow() {
     const viewDateVal = document.getElementById('viewDate').value;
-    if(!viewDateVal) return;
+    if (!viewDateVal) return;
 
     const selectedDate = new Date(viewDateVal + 'T00:00:00');
-    const dayOfWeek = selectedDate.getDay(); // 0: Paz, 1: Pzt...
+    const dayOfWeek = selectedDate.getDay();
     const t = translations[currentLang] || translations['tr'];
 
-    let combined = [];
+    let items = [];
 
-    // 1. Haftalık Rutinlerden Uyanları Çek
+    // 1. Haftalık Rutinler
     weeklyRoutines.forEach(r => {
-      if(r.days.includes(dayOfWeek)) {
-        combined.push({ type: 'weekly', id: r.id, name: r.name, time: r.time, badge: t.tabWeekly });
+      if (r.days.includes(dayOfWeek)) {
+        items.push({ id: r.id, type: 'weekly', title: r.title, time: r.time, badge: t.optWeekly });
       }
     });
 
-    // 2. Tarihli / Uzun Süreli Planlardan Uyanları Çek
+    // 2. Tarihli Planlar
     datePlans.forEach(p => {
-      if(viewDateVal >= p.startDate && viewDateVal <= p.endDate) {
-        combined.push({ type: 'date', id: p.id, name: p.name, time: p.time, badge: t.tabDate });
+      if (viewDateVal >= p.startDate && viewDateVal <= p.endDate) {
+        items.push({ id: p.id, type: 'date', title: p.title, time: p.time, badge: t.optDate });
       }
     });
 
-    // Saat Sırasına Diz
-    combined.sort((a, b) => a.time.localeCompare(b.time));
+    // Sırala
+    items.sort((a, b) => a.time.localeCompare(b.time));
 
-    const listContainer = document.getElementById('combinedTimelineList');
-    listContainer.innerHTML = '';
+    const flowList = document.getElementById('flowList');
+    flowList.innerHTML = '';
 
-    if(combined.length === 0) {
-      listContainer.innerHTML = `<div class="empty-msg">${t.emptyTimeline}</div>`;
+    if (items.length === 0) {
+      flowList.innerHTML = `<div class="empty-state">${t.empty}</div>`;
       return;
     }
 
-    combined.forEach(item => {
+    items.forEach(item => {
+      const doneKey = `${viewDateVal}_${item.id}`;
+      const isDone = !!completedItems[doneKey];
+
       const div = document.createElement('div');
-      div.className = 'timeline-item';
+      div.className = `flow-item ${isDone ? 'done' : ''}`;
       div.innerHTML = `
-        <div class="time-badge"><i class="fa-regular fa-clock"></i> ${item.time}</div>
-        <div class="timeline-content">
-          <div class="timeline-title">${item.name}</div>
-          <span class="type-tag ${item.type}">${item.badge}</span>
+        <button class="check-btn" onclick="toggleDone('${item.id}')">
+          <i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-circle'}"></i>
+        </button>
+        <span class="time-text">${item.time}</span>
+        <div class="item-info">
+          <span class="item-title">${item.title}</span>
+          <span class="item-badge ${item.type}">${item.badge}</span>
         </div>
-        <button class="delete-btn" onclick="deleteItem('${item.type}', ${item.id})"><i class="fa-solid fa-trash"></i></button>
+        <button class="del-btn" onclick="deleteItem('${item.type}', '${item.id}')">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
       `;
-      listContainer.appendChild(div);
+      flowList.appendChild(div);
     });
   }
 
   function buyRemoveAds() {
-    const t = translations[currentLang] || translations['tr'];
     localStorage.setItem('adsRemoved', 'true');
     isAdsRemoved = true;
     checkAdsStatus();
-    alert(t.adsPurchased);
   }
 
   function checkAdsStatus() {
@@ -343,11 +311,11 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     initTheme();
-    const todayStr = new Date().toISOString().split('T')[0];
-    document.getElementById('viewDate').value = todayStr;
-    document.getElementById('startDate').value = todayStr;
-    document.getElementById('endDate').value = todayStr;
-    
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('viewDate').value = today;
+    document.getElementById('startDate').value = today;
+    document.getElementById('endDate').value = today;
+
     applyLanguage(currentLang);
     checkAdsStatus();
   });
