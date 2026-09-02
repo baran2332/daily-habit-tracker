@@ -23,7 +23,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
-body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding: 20px 15px; position: relative; overflow-x: hidden; }
+body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding: 20px 15px; overflow-x: hidden; }
 
 .bg-glow { position: fixed; width: 400px; height: 400px; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.35; pointer-events: none; }
 .blob-1 { background: var(--primary); top: -80px; left: -80px; }
@@ -32,7 +32,7 @@ body { background-color: var(--bg-color); color: var(--text-main); min-height: 1
 .container { max-width: 550px; margin: 0 auto; }
 
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; color: var(--text-main); }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; }
 .logo i { color: var(--primary); font-size: 1.3rem; }
 
 .controls { display: flex; gap: 8px; align-items: center; }
@@ -44,43 +44,49 @@ body { background-color: var(--bg-color); color: var(--text-main); min-height: 1
 .remove-ads-bar { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #000; padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .remove-ads-btn { background: #000; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
+/* SEKMELER */
+.tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+.tab-btn { flex: 1; padding: 10px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-muted); border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+.tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
 .card { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
 
 .form-group { margin-bottom: 15px; }
 label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-muted); }
 
-input[type="text"], .styled-select, input[type="date"] {
+input[type="text"], input[type="date"], input[type="time"] {
   width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.15); color: var(--text-main); font-size: 0.9rem; outline: none;
 }
-.styled-select option { background: #161b2e; color: #fff; }
 
-.days-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
-.day-chip {
-  flex: 1; padding: 8px 0; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.1); color: var(--text-muted); font-size: 0.8rem; cursor: pointer; text-align: center; font-weight: 600;
-}
-.day-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-.checkbox-row { display: flex; align-items: center; gap: 8px; }
 .date-row { display: flex; gap: 10px; }
 .date-row > div { flex: 1; }
-.sub-label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
 
-.time-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-.time-row input[type="time"] { flex: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.15); color: var(--text-main); outline: none; }
-.remove-time-btn { background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+.days-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+.day-chip { flex: 1; padding: 8px 0; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.1); color: var(--text-muted); font-size: 0.8rem; cursor: pointer; text-align: center; font-weight: 600; }
+.day-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-.btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+.btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
 .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; }
-.btn-primary:hover { opacity: 0.9; }
-.btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
 .btn-block { width: 100%; }
 
-.habit-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--primary); padding: 14px 15px; margin-top: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.habit-title { font-weight: 700; font-size: 1rem; margin-bottom: 6px; color: var(--text-main); }
-.habit-details { font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
-.habit-details i { width: 16px; color: var(--primary); }
+/* CANLI AKIŞ ZAMAN ÇİZELGESİ */
+.timeline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+.timeline-header h3 { font-size: 0.95rem; }
+.timeline-header input[type="date"] { width: auto; padding: 6px 10px; font-size: 0.8rem; }
 
-.delete-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 8px; cursor: pointer; }
-.delete-btn:hover { background: var(--danger); color: white; }
+.timeline-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); margin-bottom: 8px; }
+.time-badge { background: var(--primary); color: white; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; }
+.timeline-content { flex: 1; }
+.timeline-title { font-weight: 600; font-size: 0.9rem; }
+
+.type-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 2px; }
+.type-tag.weekly { background: rgba(139, 92, 246, 0.2); color: var(--primary); }
+.type-tag.date { background: rgba(168, 85, 247, 0.2); color: var(--accent); }
+
+.delete-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+.empty-msg { text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 15px 0; }
 
 .ad-banner-area { background: rgba(0,0,0,0.2); border: 1px dashed var(--border-color); border-radius: 10px; padding: 15px; text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 25px; }
