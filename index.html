@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Habit Tracker</title>
+  <title>Weekly & Long-Term Habit Tracker</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,8 +18,8 @@
     <!-- Üst Bar -->
     <div class="header">
       <div class="logo">
-        <i class="fa-solid fa-calendar-check"></i>
-        <span id="txt-app-title">Daily Habit Tracker</span>
+        <i class="fa-solid fa-calendar-week"></i>
+        <span id="txt-app-title">Plan Tracker</span>
       </div>
       <div class="controls">
         <div class="language-selector">
@@ -43,15 +43,57 @@
       <button class="remove-ads-btn" onclick="buyRemoveAds()" id="txt-buy-btn">Satın Al</button>
     </div>
 
-    <!-- Etkinlik Ekleme Formu -->
+    <!-- Plan Ekleme Kartı -->
     <div class="card">
       <div class="form-group">
-        <label id="txt-label-habit"><i class="fa-solid fa-pen"></i> Etkinlik / Alışkanlık Adı</label>
+        <label id="txt-label-habit"><i class="fa-solid fa-pen"></i> Plan / Alışkanlık Adı</label>
         <input type="text" id="habitName" placeholder="...">
       </div>
 
+      <!-- Tekrarlama Türü -->
       <div class="form-group">
-        <label id="txt-label-times"><i class="fa-regular fa-clock"></i> Hatırlatma Saatleri (Çoklu Seçim)</label>
+        <label id="txt-label-repeat"><i class="fa-solid fa-arrows-rotate"></i> Tekrar Türü</label>
+        <select id="repeatType" onchange="toggleRepeatOptions(this.value)" class="styled-select">
+          <option value="everyday">Her Gün (Sürekli)</option>
+          <option value="weekly">Haftanın Belirli Günleri</option>
+        </select>
+      </div>
+
+      <!-- Haftalık Gün Seçimi (Gizlenebilir) -->
+      <div class="form-group" id="daysSelectorGroup" style="display: none;">
+        <label id="txt-label-days"><i class="fa-regular fa-calendar-check"></i> Günleri Seçin</label>
+        <div class="days-grid">
+          <button type="button" class="day-chip" data-day="1" onclick="toggleDayChip(this)">Pzt</button>
+          <button type="button" class="day-chip" data-day="2" onclick="toggleDayChip(this)">Sal</button>
+          <button type="button" class="day-chip" data-day="3" onclick="toggleDayChip(this)">Çar</button>
+          <button type="button" class="day-chip" data-day="4" onclick="toggleDayChip(this)">Per</button>
+          <button type="button" class="day-chip" data-day="5" onclick="toggleDayChip(this)">Cum</button>
+          <button type="button" class="day-chip" data-day="6" onclick="toggleDayChip(this)">Cmt</button>
+          <button type="button" class="day-chip" data-day="0" onclick="toggleDayChip(this)">Paz</button>
+        </div>
+      </div>
+
+      <!-- Tarih Aralığı (İsteğe Bağlı) -->
+      <div class="form-group">
+        <div class="checkbox-row">
+          <input type="checkbox" id="enableDateRange" onchange="toggleDateInputs(this.checked)">
+          <label for="enableDateRange" id="txt-label-enable-dates" style="margin-bottom:0; cursor:pointer;">Belirli Bir Tarih Aralığında Çalışsın</label>
+        </div>
+        <div class="date-row" id="dateInputsGroup" style="display: none; margin-top: 10px;">
+          <div>
+            <span class="sub-label" id="txt-label-start">Başlangıç:</span>
+            <input type="date" id="startDate">
+          </div>
+          <div>
+            <span class="sub-label" id="txt-label-end">Bitiş:</span>
+            <input type="date" id="endDate">
+          </div>
+        </div>
+      </div>
+
+      <!-- Hatırlatma Saatleri -->
+      <div class="form-group">
+        <label id="txt-label-times"><i class="fa-regular fa-clock"></i> Hatırlatma Saatleri</label>
         <div id="timeList">
           <div class="time-row">
             <input type="time" class="habit-time-input" value="09:00">
@@ -60,11 +102,11 @@
         <button type="button" class="btn btn-outline btn-block" onclick="addTimeSlot()" id="txt-add-time-btn">+ Başka Saat Ekle</button>
       </div>
 
-      <button type="button" class="btn btn-primary btn-block" onclick="saveHabit()" id="txt-save-btn">Etkinliği Kaydet</button>
+      <button type="button" class="btn btn-primary btn-block" onclick="saveHabit()" id="txt-save-btn">Planı Kaydet</button>
     </div>
 
-    <!-- Kayıtlı Etkinlikler Listesi -->
-    <h3 style="margin-top: 25px; font-size: 16px;" id="txt-title-habits">Kayıtlı Etkinlikler</h3>
+    <!-- Kayıtlı Planlar -->
+    <h3 style="margin-top: 25px; font-size: 16px;" id="txt-title-habits">Aktif Planlarım</h3>
     <div id="habitList"></div>
 
     <!-- Banner Reklam Alanı -->
@@ -75,103 +117,170 @@
 
 <script>
   let isAdsRemoved = localStorage.getItem('adsRemoved') === 'true';
+  let habits = JSON.parse(localStorage.getItem('userHabits') || '[]');
 
   const translations = {
     tr: {
-      appTitle: "Günlük Alışkanlık Takip",
+      appTitle: "Haftalık & Uzun Vadeli Planlayıcı",
       removeAdsLabel: "Reklamları Kaldır ($0.99)",
       buyBtn: "Satın Al",
-      labelHabit: "Etkinlik / Alışkanlık Adı",
-      labelTimes: "Hatırlatma Saatleri (Çoklu Seçim)",
+      labelHabit: "Plan / Alışkanlık Adı",
+      labelRepeat: "Tekrar Türü",
+      optEveryday: "Her Gün (Sürekli)",
+      optWeekly: "Haftanın Belirli Günleri",
+      labelDays: "Günleri Seçin",
+      labelEnableDates: "Belirli Bir Tarih Aralığı Belirle",
+      labelStart: "Başlangıç:",
+      labelEnd: "Bitiş:",
+      labelTimes: "Hatırlatma Saatleri",
       addTimeBtn: "+ Başka Saat Ekle",
-      saveBtn: "Etkinliği ve Bildirimleri Kaydet",
-      titleHabits: "Kayıtlı Etkinlikler",
+      saveBtn: "Planı Kaydet",
+      titleHabits: "Aktif Planlarım",
       adPlaceholder: "Sponsorlu Reklam Alanı (AdMob Banner)",
-      placeholderInput: "Örn: Kitap Oku, Su İç, Spor Yap",
-      alertEmptyName: "Lütfen etkinlik adı girin.",
-      alertEmptyTime: "Lütfen en az bir saat seçin.",
-      alertSuccess: "Etkinlik ve bildirimler başarıyla kaydedildi!",
-      adsPurchased: "Teşekkürler! Reklamlar başarıyla kaldırıldı."
+      placeholderInput: "Örn: İngilizce Çalış, Spor Yap, İlaç Al",
+      alertEmptyName: "Lütfen bir plan adı girin.",
+      alertEmptyDays: "Lütfen en az bir gün seçin.",
+      alertEmptyTime: "Lütfen en az bir saat girin.",
+      alertSuccess: "Plan başarıyla kaydedildi!",
+      adsPurchased: "Teşekkürler! Reklamlar kaldırıldı.",
+      daysShort: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
+      always: "Sürekli (Tarih Sınırı Yok)",
+      deleteBtn: "Sil"
     },
     en: {
-      appTitle: "Daily Habit Tracker",
+      appTitle: "Weekly & Long-Term Planner",
       removeAdsLabel: "Remove Ads ($0.99)",
       buyBtn: "Buy Now",
-      labelHabit: "Habit / Task Name",
-      labelTimes: "Reminder Times (Multiple)",
+      labelHabit: "Plan / Task Name",
+      labelRepeat: "Repeat Type",
+      optEveryday: "Every Day (Continuous)",
+      optWeekly: "Specific Days of Week",
+      labelDays: "Select Days",
+      labelEnableDates: "Set Specific Date Range",
+      labelStart: "Start:",
+      labelEnd: "End:",
+      labelTimes: "Reminder Times",
       addTimeBtn: "+ Add Another Time",
-      saveBtn: "Save Habit & Notifications",
-      titleHabits: "Saved Habits",
+      saveBtn: "Save Plan",
+      titleHabits: "My Active Plans",
       adPlaceholder: "Sponsored Ad Space (AdMob Banner)",
-      placeholderInput: "E.g. Read Book, Drink Water",
-      alertEmptyName: "Please enter a habit name.",
+      placeholderInput: "E.g. Read Books, Gym, Study",
+      alertEmptyName: "Please enter a plan name.",
+      alertEmptyDays: "Please select at least one day.",
       alertEmptyTime: "Please select at least one time slot.",
-      alertSuccess: "Habit and notifications set successfully!",
-      adsPurchased: "Thank you! Ads have been removed."
+      alertSuccess: "Plan saved successfully!",
+      adsPurchased: "Thank you! Ads have been removed.",
+      daysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      always: "Continuous (No End Date)",
+      deleteBtn: "Delete"
     },
     fr: {
-      appTitle: "Suivi d'Habitudes",
+      appTitle: "Planificateur Hebdomadaire & Long Terme",
       removeAdsLabel: "Supprimer les Pubs ($0.99)",
       buyBtn: "Acheter",
-      labelHabit: "Nom de l'habitude",
-      labelTimes: "Heures de rappel (Multiples)",
-      addTimeBtn: "+ Ajouter une heure",
-      saveBtn: "Enregistrer l'habitude",
-      titleHabits: "Habitudes Enregistrées",
-      adPlaceholder: "Espace Publicitaire (AdMob Banner)",
-      placeholderInput: "Ex: Lire un livre, Boire de l'eau",
-      alertEmptyName: "Veuillez entrer un nom d'habitude.",
-      alertEmptyTime: "Veuillez sélectionner au moins une heure.",
-      alertSuccess: "Habitude et notifications enregistrées avec succès!",
-      adsPurchased: "Merci! Les publicités ont été supprimées."
+      labelHabit: "Nom du Plan",
+      labelRepeat: "Type de Répétition",
+      optEveryday: "Chaque Jour (En continu)",
+      optWeekly: "Jours Spécifiques",
+      labelDays: "Sélectionner les Jours",
+      labelEnableDates: "Définir une Plage de Dates",
+      labelStart: "Début:",
+      labelEnd: "Fin:",
+      labelTimes: "Heures de Rappel",
+      addTimeBtn: "+ Ajouter une Heure",
+      saveBtn: "Enregistrer le Plan",
+      titleHabits: "Mes Plans Actifs",
+      adPlaceholder: "Espace Publicitaire (AdMob)",
+      placeholderInput: "Ex: Etudier, Sport, Méditation",
+      alertEmptyName: "Veuillez entrer un nom.",
+      alertEmptyDays: "Sélectionnez au moins un jour.",
+      alertEmptyTime: "Sélectionnez au moins une heure.",
+      alertSuccess: "Plan enregistré avec succès!",
+      adsPurchased: "Merci! Les pubs ont été supprimées.",
+      daysShort: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+      always: "En continu (Sans fin)",
+      deleteBtn: "Supprimer"
     },
     de: {
-      appTitle: "Täglicher Gewohnheits-Tracker",
+      appTitle: "Wochen- & Langzeitplaner",
       removeAdsLabel: "Werbung entfernen ($0.99)",
       buyBtn: "Kaufen",
-      labelHabit: "Name der Gewohnheit",
-      labelTimes: "Erinnerungszeiten (Mehrfach)",
+      labelHabit: "Plan / Name der Aufgabe",
+      labelRepeat: "Wiederholungstyp",
+      optEveryday: "Jeden Tag (Dauerhaft)",
+      optWeekly: "Bestimmte Wochentage",
+      labelDays: "Tage auswählen",
+      labelEnableDates: "Datumsbereich festlegen",
+      labelStart: "Start:",
+      labelEnd: "Ende:",
+      labelTimes: "Erinnerungszeiten",
       addTimeBtn: "+ Weitere Zeit hinzufügen",
-      saveBtn: "Gewohnheit speichern",
-      titleHabits: "Gespeicherte Gewohnheiten",
+      saveBtn: "Plan speichern",
+      titleHabits: "Meine aktiven Pläne",
       adPlaceholder: "Werbefläche (AdMob Banner)",
-      placeholderInput: "z.B. Buch lesen, Wasser trinken",
-      alertEmptyName: "Bitte geben Sie einen Namen ein.",
-      alertEmptyTime: "Bitte wählen Sie mindestens eine Uhrzeit.",
-      alertSuccess: "Gewohnheit und Benachrichtigungen erfolgreich gespeichert!",
-      adsPurchased: "Vielen Dank! Werbung wurde entfernt."
+      placeholderInput: "z.B. Sport, Lesen, Lernen",
+      alertEmptyName: "Bitte einen Namen eingeben.",
+      alertEmptyDays: "Bitte mindestens einen Tag wählen.",
+      alertEmptyTime: "Bitte mindestens eine Zeit wählen.",
+      alertSuccess: "Plan erfolgreich gespeichert!",
+      adsPurchased: "Vielen Dank! Werbung entfernt.",
+      daysShort: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
+      always: "Dauerhaft (Kein Enddatum)",
+      deleteBtn: "Löschen"
     },
     es: {
-      appTitle: "Rastreador de Hábitos",
+      appTitle: "Planificador Semanal y a Largo Plazo",
       removeAdsLabel: "Eliminar Anuncios ($0.99)",
       buyBtn: "Comprar",
-      labelHabit: "Nombre del Hábito",
+      labelHabit: "Nombre del Plan",
+      labelRepeat: "Tipo de Repetición",
+      optEveryday: "Todos los días (Continuo)",
+      optWeekly: "Días Específicos",
+      labelDays: "Seleccionar Días",
+      labelEnableDates: "Rango de Fechas Específico",
+      labelStart: "Inicio:",
+      labelEnd: "Fin:",
       labelTimes: "Horarios de Recordatorio",
       addTimeBtn: "+ Agregar otra hora",
-      saveBtn: "Guardar Hábito",
-      titleHabits: "Hábitos Guardados",
-      adPlaceholder: "Espacio Publicitario (AdMob Banner)",
-      placeholderInput: "Ej. Leer libro, Beber agua",
-      alertEmptyName: "Por favor ingrese un nombre.",
-      alertEmptyTime: "Por favor seleccione al menos una hora.",
-      alertSuccess: "¡Hábito y notificaciones guardados con éxito!",
-      adsPurchased: "¡Gracias! Se han eliminado los anuncios."
+      saveBtn: "Guardar Plan",
+      titleHabits: "Mis Planes Activos",
+      adPlaceholder: "Espacio Publicitario (AdMob)",
+      placeholderInput: "Ej. Leer, Gimnasio, Estudiar",
+      alertEmptyName: "Ingrese un nombre por favor.",
+      alertEmptyDays: "Seleccione al menos un día.",
+      alertEmptyTime: "Seleccione al menos una hora.",
+      alertSuccess: "¡Plan guardado con éxito!",
+      adsPurchased: "¡Gracias! Anuncios eliminados.",
+      daysShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+      always: "Continuo (Sin fecha de fin)",
+      deleteBtn: "Eliminar"
     },
     it: {
-      appTitle: "Tracker Abitudini Giornaliere",
+      appTitle: "Pianificatore Settimanale e a Lungo Termine",
       removeAdsLabel: "Rimuovi Pubblicità ($0.99)",
       buyBtn: "Acquista",
-      labelHabit: "Nome dell'Abitudine",
+      labelHabit: "Nome del Piano",
+      labelRepeat: "Tipo di Ripetizione",
+      optEveryday: "Ogni giorno (Continuo)",
+      optWeekly: "Giorni Specifici",
+      labelDays: "Seleziona Giorni",
+      labelEnableDates: "Imposta Intervallo Date",
+      labelStart: "Inizio:",
+      labelEnd: "Fine:",
       labelTimes: "Orari dei Promemoria",
-      addTimeBtn: "+ Aggiungi un altro orario",
-      saveBtn: "Salva Abitudine",
-      titleHabits: "Abitudini Salvate",
-      adPlaceholder: "Spazio Pubblicitario (AdMob Banner)",
-      placeholderInput: "Es. Leggere libro, Bere acqua",
-      alertEmptyName: "Per favore inserisci un nome.",
+      addTimeBtn: "+ Aggiungi orario",
+      saveBtn: "Salva Piano",
+      titleHabits: "I Miei Piani Attivi",
+      adPlaceholder: "Spazio Pubblicitario (AdMob)",
+      placeholderInput: "Es. Leggere, Palestra, Studiare",
+      alertEmptyName: "Inserisci un nome.",
+      alertEmptyDays: "Seleziona almeno un giorno.",
       alertEmptyTime: "Seleziona almeno un orario.",
-      alertSuccess: "Abitudine e notifiche salvate con successo!",
-      adsPurchased: "Grazie! Le pubblicità sono state rimosse."
+      alertSuccess: "Piano salvato con successo!",
+      adsPurchased: "Grazie! Pubblicità rimosse.",
+      daysShort: ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"],
+      always: "Continuo (Senza fine)",
+      deleteBtn: "Elimina"
     }
   };
 
@@ -187,12 +296,26 @@
     document.getElementById('txt-remove-ads-label').innerText = t.removeAdsLabel;
     document.getElementById('txt-buy-btn').innerText = t.buyBtn;
     document.getElementById('txt-label-habit').innerText = t.labelHabit;
+    document.getElementById('txt-label-repeat').innerText = t.labelRepeat;
+    document.getElementById('txt-label-days').innerText = t.labelDays;
+    document.getElementById('txt-label-enable-dates').innerText = t.labelEnableDates;
+    document.getElementById('txt-label-start').innerText = t.labelStart;
+    document.getElementById('txt-label-end').innerText = t.labelEnd;
     document.getElementById('txt-label-times').innerText = t.labelTimes;
     document.getElementById('txt-add-time-btn').innerText = t.addTimeBtn;
     document.getElementById('txt-save-btn').innerText = t.saveBtn;
     document.getElementById('txt-title-habits').innerText = t.titleHabits;
     document.getElementById('txt-ad-placeholder').innerText = t.adPlaceholder;
     document.getElementById('habitName').placeholder = t.placeholderInput;
+
+    // Gün Butonlarını Güncelle
+    const dayChips = document.querySelectorAll('.day-chip');
+    dayChips.forEach(chip => {
+      const dayIdx = parseInt(chip.getAttribute('data-day'));
+      chip.innerText = t.daysShort[dayIdx];
+    });
+
+    renderHabits();
   }
 
   function changeLanguage(lang) { applyLanguage(lang); }
@@ -212,6 +335,18 @@
     document.getElementById('themeBtn').innerText = savedTheme === 'light' ? '🌙' : '☀️';
   }
 
+  function toggleRepeatOptions(val) {
+    document.getElementById('daysSelectorGroup').style.display = val === 'weekly' ? 'block' : 'none';
+  }
+
+  function toggleDateInputs(checked) {
+    document.getElementById('dateInputsGroup').style.display = checked ? 'flex' : 'none';
+  }
+
+  function toggleDayChip(btn) {
+    btn.classList.toggle('active');
+  }
+
   function addTimeSlot() {
     const container = document.getElementById('timeList');
     const div = document.createElement('div');
@@ -223,57 +358,113 @@
     container.appendChild(div);
   }
 
-  async function scheduleNotification(title, timeStr) {
+  async function scheduleNotifications(habit) {
     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
       const { LocalNotifications } = window.Capacitor.Plugins;
       try {
         await LocalNotifications.requestPermissions();
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        const now = new Date();
-        const scheduledDate = new Date();
-        scheduledDate.setHours(hours, minutes, 0, 0);
-        if (scheduledDate <= now) scheduledDate.setDate(scheduledDate.getDate() + 1);
-
-        await LocalNotifications.schedule({
-          notifications: [{
-            title: "Hatırlatıcı: " + title,
-            body: timeStr + " - Etkinlik Zamanı!",
-            id: Math.floor(Math.random() * 1000000),
-            schedule: { at: scheduledDate }
-          }]
-        });
+        // Capacitor yerel bildirim kurma
+        for (let timeStr of habit.times) {
+          const [hours, minutes] = timeStr.split(':').map(Number);
+          await LocalNotifications.schedule({
+            notifications: [{
+              title: "Plan Zamanı: " + habit.name,
+              body: `${timeStr} - ${habit.name} zamanı geldi!`,
+              id: Math.floor(Math.random() * 1000000),
+              schedule: { on: { hour: hours, minute: minutes }, repeats: true }
+            }]
+          });
+        }
       } catch (err) { console.log("Notification Error:", err); }
     }
   }
 
-  async function saveHabit() {
+  function saveHabit() {
     const name = document.getElementById('habitName').value.trim();
+    const repeatType = document.getElementById('repeatType').value;
     const t = translations[currentLang] || translations['tr'];
+
     if (!name) return alert(t.alertEmptyName);
+
+    let selectedDays = [];
+    if (repeatType === 'weekly') {
+      document.querySelectorAll('.day-chip.active').forEach(chip => {
+        selectedDays.push(parseInt(chip.getAttribute('data-day')));
+      });
+      if (selectedDays.length === 0) return alert(t.alertEmptyDays);
+    } else {
+      selectedDays = [0,1,2,3,4,5,6]; // Her gün
+    }
+
+    const hasDateRange = document.getElementById('enableDateRange').checked;
+    const startDate = hasDateRange ? document.getElementById('startDate').value : null;
+    const endDate = hasDateRange ? document.getElementById('endDate').value : null;
 
     const timeInputs = document.querySelectorAll('.habit-time-input');
     const times = [];
-    for (let input of timeInputs) {
-      if (input.value) {
-        times.push(input.value);
-        await scheduleNotification(name, input.value);
-      }
-    }
+    timeInputs.forEach(input => { if (input.value) times.push(input.value); });
+
     if (times.length === 0) return alert(t.alertEmptyTime);
 
-    const habitList = document.getElementById('habitList');
-    const card = document.createElement('div');
-    card.className = 'habit-card';
-    card.innerHTML = `
-      <div>
-        <div class="habit-title">${name}</div>
-        <div class="habit-times"><i class="fa-regular fa-clock"></i> ${times.join(', ')}</div>
-      </div>
-      <span style="color: var(--primary); font-weight: bold;">✓</span>
-    `;
-    habitList.appendChild(card);
+    const newHabit = {
+      id: Date.now(),
+      name,
+      repeatType,
+      selectedDays,
+      hasDateRange,
+      startDate,
+      endDate,
+      times
+    };
+
+    habits.push(newHabit);
+    localStorage.setItem('userHabits', JSON.stringify(habits));
+    scheduleNotifications(newHabit);
+
+    // Formu temizle
     document.getElementById('habitName').value = '';
+    document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
     alert(t.alertSuccess);
+    renderHabits();
+  }
+
+  function deleteHabit(id) {
+    habits = habits.filter(h => h.id !== id);
+    localStorage.setItem('userHabits', JSON.stringify(habits));
+    renderHabits();
+  }
+
+  function renderHabits() {
+    const habitList = document.getElementById('habitList');
+    habitList.innerHTML = '';
+    const t = translations[currentLang] || translations['tr'];
+
+    habits.forEach(h => {
+      const card = document.createElement('div');
+      card.className = 'habit-card';
+
+      let daysText = "";
+      if (h.repeatType === 'everyday') {
+        daysText = t.optEveryday;
+      } else {
+        daysText = h.selectedDays.map(d => t.daysShort[d]).join(', ');
+      }
+
+      let dateText = h.hasDateRange && h.startDate && h.endDate ? `${h.startDate} ➔ ${h.endDate}` : t.always;
+
+      card.innerHTML = `
+        <div style="flex: 1;">
+          <div class="habit-title">${h.name}</div>
+          <div class="habit-details">
+            <div><i class="fa-solid fa-repeat"></i> ${daysText}</div>
+            <div><i class="fa-regular fa-clock"></i> ${h.times.join(', ')}</div>
+            <div><i class="fa-regular fa-calendar"></i> ${dateText}</div>
+          </div>
+        </div>
+        <button class="delete-btn" onclick="deleteHabit(${h.id})"><i class="fa-solid fa-trash"></i></button>
+      `;
+      habitList.appendChild(card);
+    });
   }
 
   function buyRemoveAds() {
@@ -295,6 +486,10 @@
     initTheme();
     applyLanguage(currentLang);
     checkAdsStatus();
+    
+    // Varsayılan bugünün tarihini koy
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').value = today;
   });
 </script>
 </body>
