@@ -1,0 +1,220 @@
+:root {
+  --bg-color: #0d0f17;
+  --card-bg: rgba(22, 27, 46, 0.7);
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --accent: #a855f7;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- Arka Plan Glow Animasyonları --- */
+.bg-glow {
+  position: fixed;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: -1;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.blob-1 {
+  background: var(--primary);
+  top: -100px;
+  left: -100px;
+}
+
+.blob-2 {
+  background: var(--accent);
+  bottom: -100px;
+  right: -100px;
+}
+
+/* --- Responsive Navbar --- */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 2rem;
+  background: rgba(13, 15, 23, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.logo i {
+  color: var(--primary);
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+/* Dil Seçici */
+.language-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.language-selector select {
+  background: transparent;
+  color: var(--text-main);
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.language-selector select option {
+  background: #161b2e;
+  color: #fff;
+}
+
+/* --- Genel Kart ve Cam Efekti --- */
+.container {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #fff 30%, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.8rem;
+}
+
+.hero p {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  margin-bottom: 2rem;
+}
+
+/* Structural Styles & UI Tweaks */
+textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1rem;
+  color: #fff;
+  font-size: 1rem;
+  resize: vertical;
+  margin: 1rem 0;
+  outline: none;
+}
+
+textarea:focus {
+  border-color: var(--primary);
+}
+
+.btn {
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.pricing-card.featured {
+  border-color: var(--primary);
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: var(--primary);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.hidden {
+  display: none;
+}
