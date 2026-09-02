@@ -1,220 +1,67 @@
 :root {
   --bg-color: #0d0f17;
   --card-bg: rgba(22, 27, 46, 0.7);
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
   --accent: #a855f7;
   --text-main: #f3f4f6;
   --text-muted: #9ca3af;
-  --border-color: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --danger: #ef4444;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
+[data-theme="light"] {
+  --bg-color: #f3f4f6;
+  --card-bg: #ffffff;
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --accent: #a855f7;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  --danger: #dc2626;
 }
 
-body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
+body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding: 20px 15px; position: relative; overflow-x: hidden; }
 
-/* --- Arka Plan Glow Animasyonları --- */
-.bg-glow {
-  position: fixed;
-  width: 450px;
-  height: 450px;
-  border-radius: 50%;
-  filter: blur(120px);
-  z-index: -1;
-  opacity: 0.45;
-  pointer-events: none;
-}
+.bg-glow { position: fixed; width: 400px; height: 400px; border-radius: 50%; filter: blur(120px); z-index: -1; opacity: 0.35; pointer-events: none; }
+.blob-1 { background: var(--primary); top: -80px; left: -80px; }
+.blob-2 { background: var(--accent); bottom: -80px; right: -80px; }
 
-.blob-1 {
-  background: var(--primary);
-  top: -100px;
-  left: -100px;
-}
+.container { max-width: 550px; margin: 0 auto; }
 
-.blob-2 {
-  background: var(--accent);
-  bottom: -100px;
-  right: -100px;
-}
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; color: var(--text-main); }
+.logo i { color: var(--primary); font-size: 1.3rem; }
 
-/* --- Responsive Navbar --- */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.2rem 2rem;
-  background: rgba(13, 15, 23, 0.8);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
+.controls { display: flex; gap: 8px; align-items: center; }
+.language-selector { display: flex; align-items: center; gap: 6px; background: var(--card-bg); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.85rem; }
+.language-selector select { background: transparent; color: var(--text-main); border: none; outline: none; cursor: pointer; }
+.language-selector select option { background: #161b2e; color: #fff; }
+.theme-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #fff;
-}
+.remove-ads-bar { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #000; padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.remove-ads-btn { background: #000; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-.logo i {
-  color: var(--primary);
-}
+.card { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
 
-.nav-controls {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-}
+.form-group { margin-bottom: 15px; }
+label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-muted); }
+input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.15); color: var(--text-main); font-size: 0.95rem; outline: none; }
 
-/* Dil Seçici */
-.language-selector {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-}
+.time-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.time-row input[type="time"] { flex: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.15); color: var(--text-main); outline: none; }
+.remove-time-btn { background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
 
-.language-selector select {
-  background: transparent;
-  color: var(--text-main);
-  border: none;
-  outline: none;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
+.btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+.btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
+.btn-block { width: 100%; }
 
-.language-selector select option {
-  background: #161b2e;
-  color: #fff;
-}
+.habit-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--primary); padding: 12px 15px; margin-top: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+.habit-title { font-weight: 600; font-size: 0.95rem; }
+.habit-times { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
 
-/* --- Genel Kart ve Cam Efekti --- */
-.container {
-  max-width: 900px;
-  margin: 3rem auto;
-  padding: 0 1.5rem;
-}
-
-.hero {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.hero h1 {
-  font-size: 2.5rem;
-  background: linear-gradient(135deg, #fff 30%, var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 0.8rem;
-}
-
-.hero p {
-  color: var(--text-muted);
-  font-size: 1.1rem;
-}
-
-.card {
-  background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 1.8rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  margin-bottom: 2rem;
-}
-
-/* Structural Styles & UI Tweaks */
-textarea {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 1rem;
-  color: #fff;
-  font-size: 1rem;
-  resize: vertical;
-  margin: 1rem 0;
-  outline: none;
-}
-
-textarea:focus {
-  border-color: var(--primary);
-}
-
-.btn {
-  padding: 0.7rem 1.4rem;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #fff;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background: transparent;
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-}
-
-.btn-outline:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.btn-block {
-  width: 100%;
-}
-
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.pricing-card.featured {
-  border-color: var(--primary);
-  position: relative;
-}
-
-.badge {
-  position: absolute;
-  top: -12px;
-  right: 20px;
-  background: var(--primary);
-  font-size: 0.75rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 20px;
-  font-weight: 700;
-}
-
-.hidden {
-  display: none;
-}
+.ad-banner-area { background: rgba(0,0,0,0.2); border: 1px dashed var(--border-color); border-radius: 10px; padding: 15px; text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 25px; }
