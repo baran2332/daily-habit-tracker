@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Platform</title>
+  <title>Daily Habit Tracker</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Google Fonts & FontAwesome Simgeleri -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,151 +14,288 @@
   <div class="bg-glow blob-1"></div>
   <div class="bg-glow blob-2"></div>
 
-  <!-- Üst Menü / Navbar -->
-  <header class="navbar">
-    <div class="logo">
-      <i class="fa-solid fa-brain"></i>
-      <span>AI Pro</span>
+  <div class="container">
+    <!-- Üst Bar -->
+    <div class="header">
+      <div class="logo">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span id="txt-app-title">Daily Habit Tracker</span>
+      </div>
+      <div class="controls">
+        <div class="language-selector">
+          <i class="fa-solid fa-globe"></i>
+          <select id="langSelect" onchange="changeLanguage(this.value)">
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="it">Italiano</option>
+          </select>
+        </div>
+        <button onclick="toggleTheme()" class="theme-btn" id="themeBtn">🌙</button>
+      </div>
     </div>
+
+    <!-- Reklam Kaldırma Barı -->
+    <div class="remove-ads-bar" id="removeAdsBar">
+      <span><i class="fa-solid fa-crown"></i> <span id="txt-remove-ads-label">Reklamları Kaldır ($0.99)</span></span>
+      <button class="remove-ads-btn" onclick="buyRemoveAds()" id="txt-buy-btn">Satın Al</button>
+    </div>
+
+    <!-- Etkinlik Ekleme Formu -->
+    <div class="card">
+      <div class="form-group">
+        <label id="txt-label-habit"><i class="fa-solid fa-pen"></i> Etkinlik / Alışkanlık Adı</label>
+        <input type="text" id="habitName" placeholder="...">
+      </div>
+
+      <div class="form-group">
+        <label id="txt-label-times"><i class="fa-regular fa-clock"></i> Hatırlatma Saatleri (Çoklu Seçim)</label>
+        <div id="timeList">
+          <div class="time-row">
+            <input type="time" class="habit-time-input" value="09:00">
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline btn-block" onclick="addTimeSlot()" id="txt-add-time-btn">+ Başka Saat Ekle</button>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-block" onclick="saveHabit()" id="txt-save-btn">Etkinliği Kaydet</button>
+    </div>
+
+    <!-- Kayıtlı Etkinlikler Listesi -->
+    <h3 style="margin-top: 25px; font-size: 16px;" id="txt-title-habits">Kayıtlı Etkinlikler</h3>
+    <div id="habitList"></div>
+
+    <!-- Banner Reklam Alanı -->
+    <div class="ad-banner-area" id="adBannerArea">
+      📢 <span id="txt-ad-placeholder">Sponsorlu Reklam Alanı (AdMob Banner)</span>
+    </div>
+  </div>
+
+<script>
+  let isAdsRemoved = localStorage.getItem('adsRemoved') === 'true';
+
+  const translations = {
+    tr: {
+      appTitle: "Günlük Alışkanlık Takip",
+      removeAdsLabel: "Reklamları Kaldır ($0.99)",
+      buyBtn: "Satın Al",
+      labelHabit: "Etkinlik / Alışkanlık Adı",
+      labelTimes: "Hatırlatma Saatleri (Çoklu Seçim)",
+      addTimeBtn: "+ Başka Saat Ekle",
+      saveBtn: "Etkinliği ve Bildirimleri Kaydet",
+      titleHabits: "Kayıtlı Etkinlikler",
+      adPlaceholder: "Sponsorlu Reklam Alanı (AdMob Banner)",
+      placeholderInput: "Örn: Kitap Oku, Su İç, Spor Yap",
+      alertEmptyName: "Lütfen etkinlik adı girin.",
+      alertEmptyTime: "Lütfen en az bir saat seçin.",
+      alertSuccess: "Etkinlik ve bildirimler başarıyla kaydedildi!",
+      adsPurchased: "Teşekkürler! Reklamlar başarıyla kaldırıldı."
+    },
+    en: {
+      appTitle: "Daily Habit Tracker",
+      removeAdsLabel: "Remove Ads ($0.99)",
+      buyBtn: "Buy Now",
+      labelHabit: "Habit / Task Name",
+      labelTimes: "Reminder Times (Multiple)",
+      addTimeBtn: "+ Add Another Time",
+      saveBtn: "Save Habit & Notifications",
+      titleHabits: "Saved Habits",
+      adPlaceholder: "Sponsored Ad Space (AdMob Banner)",
+      placeholderInput: "E.g. Read Book, Drink Water",
+      alertEmptyName: "Please enter a habit name.",
+      alertEmptyTime: "Please select at least one time slot.",
+      alertSuccess: "Habit and notifications set successfully!",
+      adsPurchased: "Thank you! Ads have been removed."
+    },
+    fr: {
+      appTitle: "Suivi d'Habitudes",
+      removeAdsLabel: "Supprimer les Pubs ($0.99)",
+      buyBtn: "Acheter",
+      labelHabit: "Nom de l'habitude",
+      labelTimes: "Heures de rappel (Multiples)",
+      addTimeBtn: "+ Ajouter une heure",
+      saveBtn: "Enregistrer l'habitude",
+      titleHabits: "Habitudes Enregistrées",
+      adPlaceholder: "Espace Publicitaire (AdMob Banner)",
+      placeholderInput: "Ex: Lire un livre, Boire de l'eau",
+      alertEmptyName: "Veuillez entrer un nom d'habitude.",
+      alertEmptyTime: "Veuillez sélectionner au moins une heure.",
+      alertSuccess: "Habitude et notifications enregistrées avec succès!",
+      adsPurchased: "Merci! Les publicités ont été supprimées."
+    },
+    de: {
+      appTitle: "Täglicher Gewohnheits-Tracker",
+      removeAdsLabel: "Werbung entfernen ($0.99)",
+      buyBtn: "Kaufen",
+      labelHabit: "Name der Gewohnheit",
+      labelTimes: "Erinnerungszeiten (Mehrfach)",
+      addTimeBtn: "+ Weitere Zeit hinzufügen",
+      saveBtn: "Gewohnheit speichern",
+      titleHabits: "Gespeicherte Gewohnheiten",
+      adPlaceholder: "Werbefläche (AdMob Banner)",
+      placeholderInput: "z.B. Buch lesen, Wasser trinken",
+      alertEmptyName: "Bitte geben Sie einen Namen ein.",
+      alertEmptyTime: "Bitte wählen Sie mindestens eine Uhrzeit.",
+      alertSuccess: "Gewohnheit und Benachrichtigungen erfolgreich gespeichert!",
+      adsPurchased: "Vielen Dank! Werbung wurde entfernt."
+    },
+    es: {
+      appTitle: "Rastreador de Hábitos",
+      removeAdsLabel: "Eliminar Anuncios ($0.99)",
+      buyBtn: "Comprar",
+      labelHabit: "Nombre del Hábito",
+      labelTimes: "Horarios de Recordatorio",
+      addTimeBtn: "+ Agregar otra hora",
+      saveBtn: "Guardar Hábito",
+      titleHabits: "Hábitos Guardados",
+      adPlaceholder: "Espacio Publicitario (AdMob Banner)",
+      placeholderInput: "Ej. Leer libro, Beber agua",
+      alertEmptyName: "Por favor ingrese un nombre.",
+      alertEmptyTime: "Por favor seleccione al menos una hora.",
+      alertSuccess: "¡Hábito y notificaciones guardados con éxito!",
+      adsPurchased: "¡Gracias! Se han eliminado los anuncios."
+    },
+    it: {
+      appTitle: "Tracker Abitudini Giornaliere",
+      removeAdsLabel: "Rimuovi Pubblicità ($0.99)",
+      buyBtn: "Acquista",
+      labelHabit: "Nome dell'Abitudine",
+      labelTimes: "Orari dei Promemoria",
+      addTimeBtn: "+ Aggiungi un altro orario",
+      saveBtn: "Salva Abitudine",
+      titleHabits: "Abitudini Salvate",
+      adPlaceholder: "Spazio Pubblicitario (AdMob Banner)",
+      placeholderInput: "Es. Leggere libro, Bere acqua",
+      alertEmptyName: "Per favore inserisci un nome.",
+      alertEmptyTime: "Seleziona almeno un orario.",
+      alertSuccess: "Abitudine e notifiche salvate con successo!",
+      adsPurchased: "Grazie! Le pubblicità sono state rimosse."
+    }
+  };
+
+  let currentLang = localStorage.getItem('appLang') || 'tr';
+
+  function applyLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('appLang', lang);
+    document.getElementById('langSelect').value = lang;
     
-    <div class="nav-controls">
-      <!-- 6 Dil Seçeneği -->
-      <div class="language-selector">
-        <i class="fa-solid fa-globe"></i>
-        <select id="langSelect" onchange="changeLanguage(this.value)">
-          <option value="tr">Türkçe</option>
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-          <option value="de">Deutsch</option>
-          <option value="es">Español</option>
-          <option value="it">Italiano</option>
-        </select>
-      </div>
+    const t = translations[lang] || translations['tr'];
+    document.getElementById('txt-app-title').innerText = t.appTitle;
+    document.getElementById('txt-remove-ads-label').innerText = t.removeAdsLabel;
+    document.getElementById('txt-buy-btn').innerText = t.buyBtn;
+    document.getElementById('txt-label-habit').innerText = t.labelHabit;
+    document.getElementById('txt-label-times').innerText = t.labelTimes;
+    document.getElementById('txt-add-time-btn').innerText = t.addTimeBtn;
+    document.getElementById('txt-save-btn').innerText = t.saveBtn;
+    document.getElementById('txt-title-habits').innerText = t.titleHabits;
+    document.getElementById('txt-ad-placeholder').innerText = t.adPlaceholder;
+    document.getElementById('habitName').placeholder = t.placeholderInput;
+  }
 
-      <div class="auth-buttons" id="authSection">
-        <button class="btn btn-outline" onclick="openModal('loginModal')" data-i18n="login">Giriş Yap</button>
-        <button class="btn btn-primary" onclick="openModal('registerModal')" data-i18n="register">Kayıt Ol</button>
-      </div>
-      
-      <div class="user-profile hidden" id="userSection">
-        <span id="userTokenDisplay"><i class="fa-solid fa-coins"></i> <span id="tokenCount">0</span> Token</span>
-        <button class="btn btn-danger" onclick="logout()" data-i18n="logout">Çıkış</button>
-      </div>
-    </div>
-  </header>
+  function changeLanguage(lang) { applyLanguage(lang); }
 
-  <!-- Ana İçerik -->
-  <main class="container">
-    <section class="hero">
-      <h1 data-i18n="heroTitle">Yapay Zekanın Gücünü Keşfedin</h1>
-      <p data-i18n="heroSub">Soru sorun, metin ürettirin veya analiz yaptırın. Aboneliğinizi başlatın ve sınırlar olmadan kullanın.</p>
-    </section>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
+    document.getElementById('themeBtn').innerText = newTheme === 'light' ? '🌙' : '☀️';
+    localStorage.setItem('appTheme', newTheme);
+  }
 
-    <!-- AI İstek Paneli -->
-    <section class="card ai-card">
-      <h2><i class="fa-solid fa-wand-magic-sparkles"></i> AI Asistanı</h2>
-      <textarea id="aiInput" placeholder="Yapay zekaya bir şey sorun..." rows="4"></textarea>
-      <button class="btn btn-primary btn-block" onclick="sendAiRequest()" data-i18n="sendBtn">
-        <i class="fa-solid fa-paper-plane"></i> Gönder
-      </button>
-      <div id="aiResponse" class="response-box hidden"></div>
-    </section>
+  function initTheme() {
+    const savedTheme = localStorage.getItem('appTheme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeBtn').innerText = savedTheme === 'light' ? '🌙' : '☀️';
+  }
 
-    <!-- Abonelik / Paketler -->
-    <section class="pricing-section">
-      <h2 data-i18n="plansTitle">Abonelik Paketleri</h2>
-      <div class="pricing-grid">
-        <div class="card pricing-card">
-          <h3 data-i18n="planStarter">Başlangıç</h3>
-          <div class="price">₺99 <span>/ ay</span></div>
-          <ul>
-            <li><i class="fa-solid fa-check"></i> 100.000 Token</li>
-            <li><i class="fa-solid fa-check"></i> Hızlı Yanıtlar</li>
-          </ul>
-          <button class="btn btn-outline btn-block" onclick="subscribe('starter')" data-i18n="buyBtn">Satın Al</button>
-        </div>
+  function addTimeSlot() {
+    const container = document.getElementById('timeList');
+    const div = document.createElement('div');
+    div.className = 'time-row';
+    div.innerHTML = `
+      <input type="time" class="habit-time-input" value="12:00">
+      <button type="button" class="remove-time-btn" onclick="this.parentElement.remove()">X</button>
+    `;
+    container.appendChild(div);
+  }
 
-        <div class="card pricing-card featured">
-          <div class="badge" data-i18n="popularBadge">Popüler</div>
-          <h3 data-i18n="planPro">Pro</h3>
-          <div class="price">₺249 <span>/ ay</span></div>
-          <ul>
-            <li><i class="fa-solid fa-check"></i> 500.000 Token</li>
-            <li><i class="fa-solid fa-check"></i> Öncelikli Erişim</li>
-            <li><i class="fa-solid fa-check"></i> Gelişmiş Modeller</li>
-          </ul>
-          <button class="btn btn-primary btn-block" onclick="subscribe('pro')" data-i18n="buyBtn">Satın Al</button>
-        </div>
-      </div>
-    </section>
-  </main>
+  async function scheduleNotification(title, timeStr) {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+      const { LocalNotifications } = window.Capacitor.Plugins;
+      try {
+        await LocalNotifications.requestPermissions();
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const now = new Date();
+        const scheduledDate = new Date();
+        scheduledDate.setHours(hours, minutes, 0, 0);
+        if (scheduledDate <= now) scheduledDate.setDate(scheduledDate.getDate() + 1);
 
-  <script>
-    // 6 Dil Sözlüğü
-    const translations = {
-      tr: {
-        login: "Giriş Yap", register: "Kayıt Ol", logout: "Çıkış Yap",
-        heroTitle: "Yapay Zekanın Gücünü Keşfedin",
-        heroSub: "Soru sorun, metin ürettirin veya analiz yaptırın. Üyelik oluşturarak hemen başlayın.",
-        sendBtn: "Gönder", plansTitle: "Abonelik Paketleri",
-        planStarter: "Başlangıç", planPro: "Pro", popularBadge: "Popüler", buyBtn: "Satın Al",
-        placeholder: "Yapay zekaya bir şey sorun..."
-      },
-      en: {
-        login: "Log In", register: "Register", logout: "Log Out",
-        heroTitle: "Discover the Power of AI",
-        heroSub: "Ask questions, generate text, or perform analysis. Get started with a subscription.",
-        sendBtn: "Send", plansTitle: "Subscription Plans",
-        planStarter: "Starter", planPro: "Pro", popularBadge: "Popular", buyBtn: "Subscribe",
-        placeholder: "Ask AI anything..."
-      },
-      fr: {
-        login: "Connexion", register: "S'inscrire", logout: "Déconnexion",
-        heroTitle: "Découvrez la Puissance de l'IA",
-        heroSub: "Posez des questions, géneréz du texte ou analysez. Commencez avec un abonnement.",
-        sendBtn: "Envoyer", plansTitle: "Forfaits d'Abonnement",
-        planStarter: "Débutant", planPro: "Pro", popularBadge: "Populaire", buyBtn: "S'abonner",
-        placeholder: "Posez une question à l'IA..."
-      },
-      de: {
-        login: "Anmelden", register: "Registrieren", logout: "Abmelden",
-        heroTitle: "Entdecken Sie die Kraft der KI",
-        heroSub: "Fragen stellen, Texte generieren oder Analysen durchführen. Starten Sie mit einem Abo.",
-        sendBtn: "Senden", plansTitle: "Abonnement-Pläne",
-        planStarter: "Einsteiger", planPro: "Pro", popularBadge: "Beliebt", buyBtn: "Abonnieren",
-        placeholder: "Fragen Sie die KI etwas..."
-      },
-      es: {
-        login: "Iniciar Sesión", register: "Registrarse", logout: "Cerrar Sesión",
-        heroTitle: "Descubre el Poder de la IA",
-        heroSub: "Haz preguntas, genera texto o realiza análisis. Empieza con una suscripción.",
-        sendBtn: "Enviar", plansTitle: "Planes de Suscripción",
-        planStarter: "Inicial", planPro: "Pro", popularBadge: "Popular", buyBtn: "Suscribirse",
-        placeholder: "Pregunta algo a la IA..."
-      },
-      it: {
-        login: "Accedi", register: "Registrati", logout: "Esci",
-        heroTitle: "Scopri il Potere dell'IA",
-        heroSub: "Fai domande, genera testo o effettua analisi. Inizia con un abbonamento.",
-        sendBtn: "Invia", plansTitle: "Piani di Abbonamento",
-        planStarter: "Base", planPro: "Pro", popularBadge: "Popolare", buyBtn: "Abbonati",
-        placeholder: "Chiedi qualsiasi cosa all'IA..."
-      }
-    };
+        await LocalNotifications.schedule({
+          notifications: [{
+            title: "Hatırlatıcı: " + title,
+            body: timeStr + " - Etkinlik Zamanı!",
+            id: Math.floor(Math.random() * 1000000),
+            schedule: { at: scheduledDate }
+          }]
+        });
+      } catch (err) { console.log("Notification Error:", err); }
+    }
+  }
 
-    function changeLanguage(lang) {
-      const texts = translations[lang] || translations['tr'];
-      
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (texts[key]) el.innerText = texts[key];
-      });
+  async function saveHabit() {
+    const name = document.getElementById('habitName').value.trim();
+    const t = translations[currentLang] || translations['tr'];
+    if (!name) return alert(t.alertEmptyName);
 
-      const aiInput = document.getElementById('aiInput');
-      if (aiInput && texts.placeholder) {
-        aiInput.placeholder = texts.placeholder;
+    const timeInputs = document.querySelectorAll('.habit-time-input');
+    const times = [];
+    for (let input of timeInputs) {
+      if (input.value) {
+        times.push(input.value);
+        await scheduleNotification(name, input.value);
       }
     }
-  </script>
+    if (times.length === 0) return alert(t.alertEmptyTime);
+
+    const habitList = document.getElementById('habitList');
+    const card = document.createElement('div');
+    card.className = 'habit-card';
+    card.innerHTML = `
+      <div>
+        <div class="habit-title">${name}</div>
+        <div class="habit-times"><i class="fa-regular fa-clock"></i> ${times.join(', ')}</div>
+      </div>
+      <span style="color: var(--primary); font-weight: bold;">✓</span>
+    `;
+    habitList.appendChild(card);
+    document.getElementById('habitName').value = '';
+    alert(t.alertSuccess);
+  }
+
+  function buyRemoveAds() {
+    const t = translations[currentLang] || translations['tr'];
+    localStorage.setItem('adsRemoved', 'true');
+    isAdsRemoved = true;
+    checkAdsStatus();
+    alert(t.adsPurchased);
+  }
+
+  function checkAdsStatus() {
+    if (isAdsRemoved) {
+      document.getElementById('removeAdsBar').style.display = 'none';
+      document.getElementById('adBannerArea').style.display = 'none';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    applyLanguage(currentLang);
+    checkAdsStatus();
+  });
+</script>
 </body>
 </html>
