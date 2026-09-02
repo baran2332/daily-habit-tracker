@@ -39,8 +39,8 @@
     <!-- HIZLI ÖRNEK RUTİNLER (KISAYOLLAR) -->
     <div class="quick-shortcuts">
       <span class="quick-label"><i class="fa-solid fa-bolt"></i> Hızlı Kısayollar:</span>
-      <button type="button" class="quick-btn" onclick="addWaterRoutine()">💧 2 Saatte Bir Su</button>
-      <button type="button" class="quick-btn" onclick="addMealRoutine()">🍲 5 Saatte Bir Yemek</button>
+      <button type="button" class="quick-btn" onclick="addWaterRoutine()">💧 2 Saatte Bir Su (Gün Boyu)</button>
+      <button type="button" class="quick-btn" onclick="addMealRoutine()">🍲 5 Saatte Bir Yemek (Gün Boyu)</button>
     </div>
 
     <!-- HIZLI PLAN EKLEME FORMU -->
@@ -210,16 +210,32 @@
 
   function toggleChip(btn) { btn.classList.toggle('active'); }
 
-  // Hızlı Su Takibi Ekleme
+  // 00:00'dan Başlayıp 2 Saatte Bir Su Ekleyen Kısayol
   function addWaterRoutine() {
-    weeklyRoutines.push({ id: 'w_' + Date.now(), title: '💧 Su İç (2 Saat)', days: [1,2,3,4,5,6,0], time: '10:00' });
+    for (let hour = 0; hour < 24; hour += 2) {
+      const timeStr = String(hour).padStart(2, '0') + ':00';
+      weeklyRoutines.push({
+        id: 'w_water_' + Date.now() + '_' + hour,
+        title: '💧 Su İç',
+        days: [1, 2, 3, 4, 5, 6, 0],
+        time: timeStr
+      });
+    }
     localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
     renderWeeklyGrid();
   }
 
-  // Hızlı Yemek Takibi Ekleme
+  // 00:00'dan Başlayıp 5 Saatte Bir Yemek Ekleyen Kısayol
   function addMealRoutine() {
-    weeklyRoutines.push({ id: 'w_' + Date.now(), title: '🍲 Yemek Öğünü (5 Saat)', days: [1,2,3,4,5,6,0], time: '13:00' });
+    for (let hour = 0; hour < 24; hour += 5) {
+      const timeStr = String(hour).padStart(2, '0') + ':00';
+      weeklyRoutines.push({
+        id: 'w_meal_' + Date.now() + '_' + hour,
+        title: '🍲 Yemek Öğünü',
+        days: [1, 2, 3, 4, 5, 6, 0],
+        time: timeStr
+      });
+    }
     localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
     renderWeeklyGrid();
   }
@@ -272,13 +288,11 @@
   }
 
   function selectDateForPlan(dateStr, dayIndex) {
-    // Tıklanan günü formda otomatik seç
     document.querySelector('input[value="date"]').checked = true;
     toggleFormMode('date');
     document.getElementById('startDate').value = dateStr;
     document.getElementById('endDate').value = dateStr;
     
-    // Ayrıca haftalık gün butonunu da aktif yap (eğer rutine geçerse diye)
     document.querySelectorAll('.chip').forEach(c => {
       c.classList.remove('active');
       if (parseInt(c.getAttribute('data-day')) === dayIndex) c.classList.add('active');
@@ -303,7 +317,6 @@
     document.getElementById('currentWeekRange').innerText = 
       `${currentWeekStart.getDate()} - ${weekEnd.getDate()} ${currentWeekStart.toLocaleString('default', { month: 'short' })}`;
 
-    // 7 Gün İçin Döngü (Pazartesi'den Pazar'a)
     for (let i = 0; i < 7; i++) {
       let loopDate = new Date(currentWeekStart);
       loopDate.setDate(loopDate.getDate() + i);
@@ -313,14 +326,12 @@
 
       let dayItems = [];
 
-      // Rutinler
       weeklyRoutines.forEach(r => {
         if (r.days.includes(dayIndex)) {
           dayItems.push({ id: r.id, type: 'weekly', title: r.title, time: r.time });
         }
       });
 
-      // Tarihli Planlar
       datePlans.forEach(p => {
         if (dateStr >= p.startDate && dateStr <= p.endDate) {
           dayItems.push({ id: p.id, type: 'date', title: p.title, time: p.time });
@@ -329,7 +340,6 @@
 
       dayItems.sort((a, b) => a.time.localeCompare(b.time));
 
-      // Gün Kartı Oluşturma
       const dayCard = document.createElement('div');
       dayCard.className = 'day-card';
       
