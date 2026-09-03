@@ -37,7 +37,7 @@ jobs:
       run: |
         MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
         if [ -f "$MANIFEST_PATH" ]; then
-          sed -i '/<\/application>/i \    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"/>' $MANIFEST_PATH
+          sed -i '/<\/application>/i \    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-6791068479641990~5580412508"/>' $MANIFEST_PATH
         fi
 
     - name: Build APK and AAB
