@@ -42,7 +42,7 @@ jobs:
       run: |
         cat <<EOF > capacitor.config.json
         {
-          "appId": "com.daily.habit.tracker",
+          "appId": "com.lortconsol.dailyhabittracker",
           "appName": "Daily Habit Tracker",
           "webDir": "www",
           "bundledWebRuntime": false
