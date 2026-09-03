@@ -1,158 +1,60 @@
-name: Build Android AAB and APK
+name: Build Android App
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
 
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
 
-      - name: Prepare Web Assets
-        run: |
-          mkdir -p www
-          if [ -d "public" ]; then cp -r public/* www/ 2>/dev/null || true; fi
-          if [ -d "dist" ]; then cp -r dist/* www/ 2>/dev/null || true; fi
-          if [ -d "build" ]; then cp -r build/* www/ 2>/dev/null || true; fi
-          cp -r *.html *.js *.css *.json assets 2>/dev/null || true
-          cp -r * www/ 2>/dev/null || true
+    - name: Install Dependencies
+      run: |
+        npm install
+        npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/admob @capacitor/local-notifications
 
-      - name: Initialize Project & Install Capacitor Plugins
-        run: |
-          npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor-community/admob @capacitor/local-notifications
+    - name: Generate Android Project
+      run: |
+        npx cap add android || true
+        npx cap sync android
 
-      - name: Initialize Capacitor Config
-        run: |
-          npx cap init "Daily Tracker" "com.dailyhabit.tracker" --web-dir www
+    - name: Inject AdMob App ID to Manifest
+      run: |
+        MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
+        if [ -f "$MANIFEST_PATH" ]; then
+          sed -i '/<\/application>/i \    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"/>' $MANIFEST_PATH
+        fi
 
-      - name: Inject AdMob Script to index.html (If Ads Not Removed)
-        run: |
-          cat << 'EOF' > inject_admob.py
-          import os
+    - name: Build APK and AAB
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleRelease
+        ./gradlew bundleRelease
 
-          html_path = "www/index.html"
-          if os.path.exists(html_path):
-              with open(html_path, "r", encoding="utf-8") as f:
-                  content = f.read()
-              
-              admob_script = """
-          <script>
-            document.addEventListener("DOMContentLoaded", async () => {
-              const adsRemoved = localStorage.getItem('adsRemoved') === 'true';
-              if (!adsRemoved && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
-                const { AdMob } = window.Capacitor.Plugins;
-                try {
-                  await AdMob.initialize({ requestTrackingAuthorization: true });
-                  await AdMob.prepareInterstitial({
-                    adId: 'ca-app-pub-3940256099942544/1033173712',
-                    isTesting: true
-                  });
-                  await AdMob.showInterstitial();
-                } catch (e) {
-                  console.log("AdMob Hatasi:", e);
-                }
-              }
-            });
-          </script>
-          """
-              if "</head>" in content:
-                  content = content.replace("</head>", admob_script + "\n</head>")
-              else:
-                  content = admob_script + content
-                  
-              with open(html_path, "w", encoding="utf-8") as f:
-                  f.write(content)
-          EOF
-          python3 inject_admob.py
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: App-Release-APK
+        path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-      - name: Add Android Platform & Sync
-        run: |
-          npx cap add android
-          npx cap sync android
-
-      - name: Inject Permissions & Config to AndroidManifest.xml
-        run: |
-          cat << 'EOF' > inject_manifest.py
-          import os
-
-          manifest_path = "android/app/src/main/AndroidManifest.xml"
-          if os.path.exists(manifest_path):
-              with open(manifest_path, "r", encoding="utf-8") as f:
-                  content = f.read()
-              
-              admob_meta = """
-              <meta-data
-                  android:name="com.google.android.gms.ads.APPLICATION_ID"
-                  android:value="ca-app-pub-3940256099942544~3347511713"/>
-              """
-              if "com.google.android.gms.ads.APPLICATION_ID" not in content:
-                  content = content.replace("</application>", admob_meta + "\n</application>")
-
-              notif_permissions = """
-              <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-              <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-              """
-              if "POST_NOTIFICATIONS" not in content:
-                  content = content.replace("</manifest>", notif_permissions + "\n</manifest>")
-
-              with open(manifest_path, "w", encoding="utf-8") as f:
-                  f.write(content)
-          EOF
-          python3 inject_manifest.py
-
-      - name: Fix Kotlin Duplicate Classes Conflict
-        run: |
-          cat << 'EOF' > fix_gradle.py
-          import os
-
-          gradle_path = "android/app/build.gradle"
-          if os.path.exists(gradle_path):
-              with open(gradle_path, "r") as f:
-                  content = f.read()
-              
-              fix_code = """
-          configurations.all {
-              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
-              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-          }
-          """
-              if "configurations.all" not in content:
-                  content += fix_code
-                  with open(gradle_path, "w") as f:
-                      f.write(content)
-          EOF
-          python3 fix_gradle.py
-
-      - name: Build Android Release Bundle (AAB) & APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew bundleRelease assembleDebug --no-daemon
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Upload AAB Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-bundle
-          path: android/app/build/outputs/bundle/release/app-release.aab
+    - name: Upload AAB (Play Console)
+      uses: actions/upload-artifact@v3
+      with:
+        name: App-Release-AAB
+        path: android/app/build/outputs/bundle/release/app-release.aab
