@@ -18,6 +18,14 @@
         <span id="txt-app-title">Pratik Planlayıcı</span>
       </div>
       <div class="header-actions">
+        <!-- Tema Seçici -->
+        <select id="themeSelect" onchange="changeTheme(this.value)" class="sm-select">
+          <option value="dark">🌙 Koyu</option>
+          <option value="light">☀️ Açık</option>
+          <option value="ocean">🌊 Okyanus</option>
+          <option value="sepia">☕ Sepya</option>
+        </select>
+        <!-- Dil Seçici -->
         <select id="langSelect" onchange="changeLanguage(this.value)" class="sm-select">
           <option value="tr">TR</option>
           <option value="en">EN</option>
@@ -26,14 +34,16 @@
           <option value="es">ES</option>
           <option value="it">IT</option>
         </select>
-        <button onclick="toggleTheme()" class="icon-btn" id="themeBtn">🌙</button>
       </div>
     </header>
 
     <!-- Reklam Barı -->
     <div class="ad-bar" id="removeAdsBar">
       <span>👑 <span id="txt-remove-ads">Reklamları Kaldır ($0.99)</span></span>
-      <button onclick="buyRemoveAds()" class="btn-xs" id="txt-buy">Satın Al</button>
+      <div class="ad-bar-buttons">
+        <button onclick="restorePurchases()" class="btn-xs-outline" id="txt-restore">Satın Alımları Geri Yükle</button>
+        <button onclick="buyRemoveAds()" class="btn-xs" id="txt-buy">Satın Al</button>
+      </div>
     </div>
 
     <!-- HIZLI ÖRNEK RUTİNLER (KISAYOLLAR) -->
@@ -105,7 +115,7 @@
       <div id="weeklyGrid" class="weekly-grid"></div>
     </section>
 
-    <!-- YEDEKLEME VE VERİ DARA AKTARMA SEÇENEKLERİ -->
+    <!-- YEDEKLEME VE VERİ DIŞA AKTARMA SEÇENEKLERİ -->
     <section class="card backup-card">
       <div class="backup-header">
         <i class="fa-solid fa-database"></i>
@@ -129,6 +139,7 @@
   let weeklyRoutines = JSON.parse(localStorage.getItem('weeklyRoutines') || '[]');
   let datePlans = JSON.parse(localStorage.getItem('datePlans') || '[]');
   let completedItems = JSON.parse(localStorage.getItem('completedItems') || '{}');
+  let deletedSingleEntries = JSON.parse(localStorage.getItem('deletedSingleEntries') || '[]');
 
   let currentWeekStart = getMonday(new Date());
 
@@ -137,6 +148,7 @@
       title: "Pratik Planlayıcı",
       removeAds: "Reklamları Kaldır ($0.99)",
       buy: "Satın Al",
+      restore: "Geri Yükle",
       shortcutsLabel: "Hızlı Kısayollar:",
       btnWater: "💧 2 Saatte Bir Su",
       btnMeal: "🍲 5 Saatte Bir Yemek",
@@ -155,12 +167,14 @@
       emptyDay: "Plan yok",
       fillAlert: "Lütfen başlık ve gerekli alanları doldurun.",
       importSuccess: "Veriler başarıyla yüklendi!",
-      importError: "Geçersiz yedek dosyası!"
+      importError: "Geçersiz yedek dosyası!",
+      restoreSuccess: "Satın alımlar başarıyla geri yüklendi!"
     },
     en: {
       title: "Simple Planner",
       removeAds: "Remove Ads ($0.99)",
       buy: "Buy",
+      restore: "Restore",
       shortcutsLabel: "Quick Shortcuts:",
       btnWater: "💧 Water Every 2 hrs",
       btnMeal: "🍲 Meal Every 5 hrs",
@@ -179,12 +193,14 @@
       emptyDay: "No plan",
       fillAlert: "Please fill in title and required fields.",
       importSuccess: "Data imported successfully!",
-      importError: "Invalid backup file!"
+      importError: "Invalid backup file!",
+      restoreSuccess: "Purchases restored successfully!"
     },
     fr: {
       title: "Planificateur Simple",
       removeAds: "Supprimer la pub ($0.99)",
       buy: "Acheter",
+      restore: "Restaurer",
       shortcutsLabel: "Raccourcis Rapides:",
       btnWater: "💧 Eau toutes les 2h",
       btnMeal: "🍲 Repas tous les 5h",
@@ -203,12 +219,14 @@
       emptyDay: "Aucun plan",
       fillAlert: "Veuillez remplir le titre et les champs requis.",
       importSuccess: "Données importées avec succès!",
-      importError: "Fichier de sauvegarde invalide!"
+      importError: "Fichier de sauvegarde invalide!",
+      restoreSuccess: "Achats restaurés avec succès!"
     },
     de: {
       title: "Einfacher Planer",
       removeAds: "Werbung entfernen ($0.99)",
       buy: "Kaufen",
+      restore: "Wiederherstellen",
       shortcutsLabel: "Schnellzugriff:",
       btnWater: "💧 Wasser alle 2 Std",
       btnMeal: "🍲 Essen alle 5 Std",
@@ -227,12 +245,14 @@
       emptyDay: "Kein Plan",
       fillAlert: "Bitte füllen Sie den Titel und die erforderlichen Felder aus.",
       importSuccess: "Daten erfolgreich importiert!",
-      importError: "Ungültige Sicherungsdatei!"
+      importError: "Ungültige Sicherungsdatei!",
+      restoreSuccess: "Käufe erfolgreich wiederhergestellt!"
     },
     es: {
       title: "Planificador Simple",
       removeAds: "Eliminar Anuncios ($0.99)",
       buy: "Comprar",
+      restore: "Restaurar",
       shortcutsLabel: "Atajos Rápidos:",
       btnWater: "💧 Agua cada 2 horas",
       btnMeal: "🍲 Comida cada 5 horas",
@@ -251,12 +271,14 @@
       emptyDay: "Sin plan",
       fillAlert: "Por favor complete el título y los campos requeridos.",
       importSuccess: "¡Datos importados con éxito!",
-      importError: "¡Archivo de copia no válido!"
+      importError: "¡Archivo de copia no válido!",
+      restoreSuccess: "¡Compras restauradas con éxito!"
     },
     it: {
       title: "Pianificatore Semplice",
       removeAds: "Rimuovi Pubblicità ($0.99)",
       buy: "Acquista",
+      restore: "Ripristina",
       shortcutsLabel: "Scorciatoie Rapide:",
       btnWater: "💧 Acqua ogni 2 ore",
       btnMeal: "🍲 Cibo ogni 5 ore",
@@ -275,7 +297,8 @@
       emptyDay: "Nessun piano",
       fillAlert: "Si prega di compilare il titolo e i campi obbligatori.",
       importSuccess: "Dati importati con successo!",
-      importError: "File di backup non valido!"
+      importError: "File di backup non valido!",
+      restoreSuccess: "Acquisti ripristinati con successo!"
     }
   };
 
@@ -296,6 +319,7 @@
     document.getElementById('txt-app-title').innerText = t.title;
     document.getElementById('txt-remove-ads').innerText = t.removeAds;
     document.getElementById('txt-buy').innerText = t.buy;
+    document.getElementById('txt-restore').innerText = t.restore;
     document.getElementById('txt-shortcuts-label').innerText = t.shortcutsLabel;
     document.getElementById('txt-btn-water').innerText = t.btnWater;
     document.getElementById('txt-btn-meal').innerText = t.btnMeal;
@@ -319,19 +343,15 @@
 
   function changeLanguage(lang) { applyLanguage(lang); }
 
-  function toggleTheme() {
-    const html = document.documentElement;
-    const isLight = html.getAttribute('data-theme') === 'light';
-    const newTheme = isLight ? 'dark' : 'light';
-    html.setAttribute('data-theme', newTheme);
-    document.getElementById('themeBtn').innerText = isLight ? '🌙' : '☀️';
-    localStorage.setItem('appTheme', newTheme);
+  function changeTheme(themeName) {
+    document.documentElement.setAttribute('data-theme', themeName);
+    localStorage.setItem('appTheme', themeName);
   }
 
   function initTheme() {
     const theme = localStorage.getItem('appTheme') || 'dark';
     document.documentElement.setAttribute('data-theme', theme);
-    document.getElementById('themeBtn').innerText = theme === 'light' ? '🌙' : '☀️';
+    document.getElementById('themeSelect').value = theme;
   }
 
   function toggleFormMode(mode) {
@@ -432,13 +452,12 @@
     renderWeeklyGrid();
   }
 
-  function deleteItem(type, id) {
-    if (type === 'weekly') {
-      weeklyRoutines = weeklyRoutines.filter(r => r.id !== id);
-      localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
-    } else {
-      datePlans = datePlans.filter(p => p.id !== id);
-      localStorage.setItem('datePlans', JSON.stringify(datePlans));
+  /* Sadece seçilen güne ve kayda ait silme mantığı */
+  function deleteSingleOccurrence(dateStr, itemId) {
+    const deleteKey = `${dateStr}_${itemId}`;
+    if (!deletedSingleEntries.includes(deleteKey)) {
+      deletedSingleEntries.push(deleteKey);
+      localStorage.setItem('deletedSingleEntries', JSON.stringify(deletedSingleEntries));
     }
     renderWeeklyGrid();
   }
@@ -485,13 +504,19 @@
 
       weeklyRoutines.forEach(r => {
         if (r.days.includes(dayIndex)) {
-          dayItems.push({ id: r.id, type: 'weekly', title: r.title, time: r.time });
+          const checkKey = `${dateStr}_${r.id}`;
+          if (!deletedSingleEntries.includes(checkKey)) {
+            dayItems.push({ id: r.id, type: 'weekly', title: r.title, time: r.time });
+          }
         }
       });
 
       datePlans.forEach(p => {
         if (dateStr >= p.startDate && dateStr <= p.endDate) {
-          dayItems.push({ id: p.id, type: 'date', title: p.title, time: p.time });
+          const checkKey = `${dateStr}_${p.id}`;
+          if (!deletedSingleEntries.includes(checkKey)) {
+            dayItems.push({ id: p.id, type: 'date', title: p.title, time: p.time });
+          }
         }
       });
 
@@ -521,7 +546,7 @@
               </button>
               <span class="mini-time">${item.time}</span>
               <span class="mini-title">${item.title}</span>
-              <button class="mini-del" onclick="deleteItem('${item.type}', '${item.id}')">×</button>
+              <button class="mini-del" onclick="deleteSingleOccurrence('${dateStr}', '${item.id}')">×</button>
             </div>
           `;
         });
@@ -537,7 +562,8 @@
     const backupData = {
       weeklyRoutines,
       datePlans,
-      completedItems
+      completedItems,
+      deletedSingleEntries
     };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
     const downloadAnchor = document.createElement('a');
@@ -558,10 +584,12 @@
           weeklyRoutines = parsed.weeklyRoutines;
           datePlans = parsed.datePlans;
           completedItems = parsed.completedItems || {};
+          deletedSingleEntries = parsed.deletedSingleEntries || [];
           
           localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
           localStorage.setItem('datePlans', JSON.stringify(datePlans));
           localStorage.setItem('completedItems', JSON.stringify(completedItems));
+          localStorage.setItem('deletedSingleEntries', JSON.stringify(deletedSingleEntries));
           
           renderWeeklyGrid();
           alert(t.importSuccess);
@@ -581,6 +609,14 @@
     localStorage.setItem('adsRemoved', 'true');
     isAdsRemoved = true;
     checkAdsStatus();
+  }
+
+  function restorePurchases() {
+    const t = translations[currentLang] || translations['tr'];
+    localStorage.setItem('adsRemoved', 'true');
+    isAdsRemoved = true;
+    checkAdsStatus();
+    alert(t.restoreSuccess);
   }
 
   function checkAdsStatus() {
