@@ -33,11 +33,21 @@ jobs:
       run: |
         npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor-community/admob @capacitor/local-notifications
 
+    - name: Prepare Web Assets Folder (www)
+      run: |
+        mkdir -p www
+        rsync -av --exclude='node_modules' --exclude='.git' --exclude='.github' --exclude='android' --exclude='www' ./ www/
+
     - name: Generate Capacitor Config & Android Project
       run: |
-        if [ ! -f capacitor.config.json ] && [ ! -f capacitor.config.ts ]; then
-          npx cap init "Daily Habit Tracker" "com.daily.habit.tracker" --web-dir "."
-        fi
+        cat <<EOF > capacitor.config.json
+        {
+          "appId": "com.daily.habit.tracker",
+          "appName": "Daily Habit Tracker",
+          "webDir": "www",
+          "bundledWebRuntime": false
+        }
+        EOF
         npx cap add android || true
         npx cap sync android
 
