@@ -55,21 +55,29 @@ jobs:
       run: |
         MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
         if [ -f "$MANIFEST_PATH" ]; then
-          sed -i '/<\/application>/i \    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-6791068479641990~5580412508 "/>' $MANIFEST_PATH
+          sed -i '/<\/application>/i \    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-6791068479641990~5580412508"/>' $MANIFEST_PATH
         fi
 
-    - name: Build APK and AAB
+    - name: Build and Sign APK & AAB
       run: |
         cd android
         chmod +x gradlew
         ./gradlew assembleRelease
         ./gradlew bundleRelease
+        
+        # Tablette kurulabilmesi için Keystore üretip APK ve AAB dosyalarını imzala
+        keytool -genkeypair -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+        jarsigner -keystore debug.keystore -storepass android -keypass android app/build/outputs/apk/release/app-release-unsigned.apk androiddebugkey
+        jarsigner -keystore debug.keystore -storepass android -keypass android app/build/outputs/bundle/release/app-release.aab androiddebugkey
+        
+        # İmzalı APK dosyasını adlandır
+        mv app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-signed.apk
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: App-Release-APK
-        path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+        path: android/app/build/outputs/apk/release/app-release-signed.apk
 
     - name: Upload AAB (Play Console)
       uses: actions/upload-artifact@v4
