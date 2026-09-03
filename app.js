@@ -1,90 +1,60 @@
-import { AdMob, BannerAdSize, BannerAdPosition } from '@capacitor-community/admob';
-import { LocalNotifications } from '@capacitor/local-notifications';
-
 // ==========================================
 // 1. REKLAM KİMLİKLERİ (AD UNIT IDs)
 // ==========================================
-// AdMob panelinden aldığın (sonu / ile biten) ID'leri buraya yapıştır:
-const ADMOB_BANNER_ID = 'ca-app-pub-6791068479641990/1929671055'; // BURAYA BANNER REKLAM ID'Nİ YAZ
-const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-6791068479641990/1597769618'; // BURAYA GEÇİŞ REKLAM ID'Nİ YAZ
+const ADMOB_BANNER_ID = 'ca-app-pub-6791068479641990/1929671055'; // BURAYA BANNER ID'Nİ YAZ
+const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-6791068479641990/1597769618'; // BURAYA GEÇİŞ ID'Nİ YAZ
 
 // ==========================================
 // 2. ADMOB BAŞLATMA VE BANNER GÖSTERME
 // ==========================================
 async function initAdMob() {
-  try {
-    // AdMob SDK Başlat
-    await AdMob.initialize();
-
-    // Banner Reklam Yükle ve En Alta Hizala
-    await AdMob.showBanner({
-      adId: ADMOB_BANNER_ID,
-      adSize: BannerAdSize.BANNER,
-      position: BannerAdPosition.BOTTOM_CENTER,
-      margin: 0,
-      isTesting: false // Mağazaya gönderirken false olmalı
-    });
-    console.log("Banner reklam başarıyla yüklendi.");
-  } catch (error) {
-    console.error("AdMob Başlatma Hatası:", error);
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+    const { AdMob } = window.Capacitor.Plugins;
+    try {
+      await AdMob.initialize();
+      await AdMob.showBanner({
+        adId: ADMOB_BANNER_ID,
+        adSize: 'BANNER',
+        position: 'BOTTOM_CENTER',
+        margin: 0,
+        isTesting: false
+      });
+      console.log("Banner yüklendi.");
+    } catch (e) {
+      console.log("AdMob Hatası:", e);
+    }
   }
 }
 
 // ==========================================
-// 3. GEÇİŞ REKLAMI (INTERSTITIAL) GÖSTERME
+// 3. GEÇİŞ REKLAMI GÖSTERME
 // ==========================================
-// Alışkanlık tamamlama veya yeni alışkanlık ekleme fonksiyonunun sonuna ekleyebilirsin:
 async function showInterstitialAd() {
-  try {
-    await AdMob.prepareInterstitial({
-      adId: ADMOB_INTERSTITIAL_ID,
-      isTesting: false
-    });
-    await AdMob.showInterstitial();
-  } catch (error) {
-    console.error("Geçiş Reklamı Gösterme Hatası:", error);
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+    const { AdMob } = window.Capacitor.Plugins;
+    try {
+      await AdMob.prepareInterstitial({
+        adId: ADMOB_INTERSTITIAL_ID,
+        isTesting: false
+      });
+      await AdMob.showInterstitial();
+    } catch (e) {
+      console.log("Geçiş Reklamı Hatası:", e);
+    }
   }
 }
 
 // ==========================================
-// 4. YEREL BİLDİRİM (LOCAL NOTIFICATION) İZİNLERİ VE BİLDİRİM KURMA
+// 4. BİLDİRİMLERİ BAŞLATMA
 // ==========================================
 async function initNotifications() {
-  try {
-    // Bildirim İzni İste
-    const permResult = await LocalNotifications.requestPermissions();
-    if (permResult.display === 'granted') {
-      console.log("Bildirim izni alındı.");
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+    const { LocalNotifications } = window.Capacitor.Plugins;
+    try {
+      await LocalNotifications.requestPermissions();
+    } catch (e) {
+      console.log("Bildirim Hatası:", e);
     }
-  } catch (error) {
-    console.error("Bildirim İzni Hatası:", error);
-  }
-}
-
-// Günlük Hatırlatıcı Bildirim Zamanlama Fonksiyonu
-async function scheduleDailyReminder(id, title, body, hour, minute) {
-  try {
-    await LocalNotifications.schedule({
-      notifications: [
-        {
-          title: title,
-          body: body,
-          id: id,
-          schedule: {
-            on: {
-              hour: hour,
-              minute: minute
-            },
-            repeats: true,
-            every: 'day'
-          },
-          actionTypeId: '',
-          extra: null
-        }
-      ]
-    });
-  } catch (error) {
-    console.error("Bildirim Kurma Hatası:", error);
   }
 }
 
@@ -92,7 +62,6 @@ async function scheduleDailyReminder(id, title, body, hour, minute) {
 // 5. UYGULAMA YÜKLENDİĞİNDE ÇALIŞTIR
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Servisleri ve reklamları başlat
   initAdMob();
   initNotifications();
 });
