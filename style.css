@@ -31,7 +31,7 @@ body { background-color: var(--bg); color: var(--text); padding: 16px 12px; min-
 .header { display: flex; justify-content: space-between; align-items: center; }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; color: var(--primary); }
 .header-actions { display: flex; gap: 8px; align-items: center; }
-.sm-select { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; }
+.sm-select { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; outline: none; }
 .icon-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 5px 9px; border-radius: 6px; cursor: pointer; }
 
 /* Hızlı Kısayollar */
@@ -92,4 +92,11 @@ body { background-color: var(--bg); color: var(--text); padding: 16px 12px; min-
 .mini-title { flex: 1; font-weight: 500; }
 .mini-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.9rem; line-height: 1; }
 
+/* VERİ YÖNETİMİ */
+.backup-card { gap: 10px; }
+.backup-header { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem; color: var(--muted); }
+.backup-actions { display: flex; gap: 8px; }
+.btn-secondary { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+
+/* REKLAM ALANI */
 .ad-placeholder { background: var(--card-bg); border: 1px dashed var(--border); border-radius: 8px; padding: 12px; text-align: center; font-size: 0.75rem; color: var(--muted); }
