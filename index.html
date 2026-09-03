@@ -105,6 +105,19 @@
       <div id="weeklyGrid" class="weekly-grid"></div>
     </section>
 
+    <!-- YEDEKLEME VE VERİ DARA AKTARMA SEÇENEKLERİ -->
+    <section class="card backup-card">
+      <div class="backup-header">
+        <i class="fa-solid fa-database"></i>
+        <span id="txt-backup-title">Veri Yönetimi</span>
+      </div>
+      <div class="backup-actions">
+        <button onclick="exportData()" class="btn-secondary" id="txt-export-btn">📥 Yedeği İndir (Export)</button>
+        <button onclick="document.getElementById('importFileInput').click()" class="btn-secondary" id="txt-import-btn">📤 Yedeği Yükle (Import)</button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importData(event)">
+      </div>
+    </section>
+
     <!-- AdMob Reklam Alanı -->
     <div class="ad-placeholder" id="adBannerArea">
       <span id="txt-ad-text">📢 Sponsorlu Reklam Alanı</span>
@@ -134,10 +147,15 @@
       placeholder: "Plan veya rutin adı...",
       addBtn: "+ Ekle",
       flowTitle: "Haftalık Görünüm",
+      backupTitle: "Veri Yönetimi",
+      exportBtn: "📥 Yedeği İndir (Export)",
+      importBtn: "📤 Yedeği Yükle (Import)",
       adText: "📢 Sponsorlu Reklam Alanı",
       days: { 0: "Paz", 1: "Pzt", 2: "Sal", 3: "Çar", 4: "Per", 5: "Cum", 6: "Cmt" },
       emptyDay: "Plan yok",
-      fillAlert: "Lütfen başlık ve gerekli alanları doldurun."
+      fillAlert: "Lütfen başlık ve gerekli alanları doldurun.",
+      importSuccess: "Veriler başarıyla yüklendi!",
+      importError: "Geçersiz yedek dosyası!"
     },
     en: {
       title: "Simple Planner",
@@ -153,10 +171,15 @@
       placeholder: "Plan or routine name...",
       addBtn: "+ Add",
       flowTitle: "Weekly View",
+      backupTitle: "Data Management",
+      exportBtn: "📥 Export Backup",
+      importBtn: "📤 Import Backup",
       adText: "📢 Sponsored Ad Area",
       days: { 0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat" },
       emptyDay: "No plan",
-      fillAlert: "Please fill in title and required fields."
+      fillAlert: "Please fill in title and required fields.",
+      importSuccess: "Data imported successfully!",
+      importError: "Invalid backup file!"
     },
     fr: {
       title: "Planificateur Simple",
@@ -172,10 +195,15 @@
       placeholder: "Nom du plan ou routine...",
       addBtn: "+ Ajouter",
       flowTitle: "Vue Hebdomadaire",
+      backupTitle: "Gestion des Données",
+      exportBtn: "📥 Exporter Sauvegarde",
+      importBtn: "📤 Importer Sauvegarde",
       adText: "📢 Espace Publicitaire",
       days: { 0: "Dim", 1: "Lun", 2: "Mar", 3: "Mer", 4: "Jeu", 5: "Ven", 6: "Sam" },
       emptyDay: "Aucun plan",
-      fillAlert: "Veuillez remplir le titre et les champs requis."
+      fillAlert: "Veuillez remplir le titre et les champs requis.",
+      importSuccess: "Données importées avec succès!",
+      importError: "Fichier de sauvegarde invalide!"
     },
     de: {
       title: "Einfacher Planer",
@@ -191,10 +219,15 @@
       placeholder: "Plan- oder Routinenname...",
       addBtn: "+ Hinzufügen",
       flowTitle: "Wochenansicht",
+      backupTitle: "Datenverwaltung",
+      exportBtn: "📥 Sicherung Exportieren",
+      importBtn: "📤 Sicherung Importieren",
       adText: "📢 Werbebereich",
       days: { 0: "So", 1: "Mo", 2: "Di", 3: "Mi", 4: "Do", 5: "Fr", 6: "Sa" },
       emptyDay: "Kein Plan",
-      fillAlert: "Bitte füllen Sie den Titel und die erforderlichen Felder aus."
+      fillAlert: "Bitte füllen Sie den Titel und die erforderlichen Felder aus.",
+      importSuccess: "Daten erfolgreich importiert!",
+      importError: "Ungültige Sicherungsdatei!"
     },
     es: {
       title: "Planificador Simple",
@@ -210,10 +243,15 @@
       placeholder: "Nombre del plan o rutina...",
       addBtn: "+ Añadir",
       flowTitle: "Vista Semanal",
+      backupTitle: "Gestión de Datos",
+      exportBtn: "📥 Exportar Copia",
+      importBtn: "📤 Importar Copia",
       adText: "📢 Área de Anuncios",
       days: { 0: "Dom", 1: "Lun", 2: "Mar", 3: "Mié", 4: "Jue", 5: "Vie", 6: "Sáb" },
       emptyDay: "Sin plan",
-      fillAlert: "Por favor complete el título y los campos requeridos."
+      fillAlert: "Por favor complete el título y los campos requeridos.",
+      importSuccess: "¡Datos importados con éxito!",
+      importError: "¡Archivo de copia no válido!"
     },
     it: {
       title: "Pianificatore Semplice",
@@ -229,10 +267,15 @@
       placeholder: "Nome del piano o routine...",
       addBtn: "+ Aggiungi",
       flowTitle: "Vista Settimanale",
+      backupTitle: "Gestione Dati",
+      exportBtn: "📥 Esporta Backup",
+      importBtn: "📤 Importa Backup",
       adText: "📢 Spazio Pubblicitario",
       days: { 0: "Dom", 1: "Lun", 2: "Mar", 3: "Mer", 4: "Gio", 5: "Ven", 6: "Sab" },
       emptyDay: "Nessun piano",
-      fillAlert: "Si prega di compilare il titolo e i campi obbligatori."
+      fillAlert: "Si prega di compilare il titolo e i campi obbligatori.",
+      importSuccess: "Dati importati con successo!",
+      importError: "File di backup non valido!"
     }
   };
 
@@ -261,6 +304,9 @@
     document.getElementById('planTitle').placeholder = t.placeholder;
     document.getElementById('txt-add-btn').innerText = t.addBtn;
     document.getElementById('txt-flow-title').innerText = t.flowTitle;
+    document.getElementById('txt-backup-title').innerText = t.backupTitle;
+    document.getElementById('txt-export-btn').innerText = t.exportBtn;
+    document.getElementById('txt-import-btn').innerText = t.importBtn;
     document.getElementById('txt-ad-text').innerText = t.adText;
 
     document.querySelectorAll('.chip').forEach(chip => {
@@ -300,6 +346,22 @@
 
   function toggleChip(btn) { btn.classList.toggle('active'); }
 
+  async function scheduleLocalNotification(title, timeStr) {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+      try {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        await window.Capacitor.Plugins.LocalNotifications.schedule({
+          notifications: [{
+            title: title,
+            body: timeStr + ' zamanı geldi!',
+            id: Math.floor(Math.random() * 100000),
+            schedule: { on: { hour: hours, minute: minutes } }
+          }]
+        });
+      } catch (e) { console.log("Bildirim hatası:", e); }
+    }
+  }
+
   function addWaterRoutine() {
     const t = translations[currentLang] || translations['tr'];
     for (let hour = 0; hour < 24; hour += 2) {
@@ -310,6 +372,7 @@
         days: [1, 2, 3, 4, 5, 6, 0],
         time: timeStr
       });
+      scheduleLocalNotification(t.waterTitle, timeStr);
     }
     localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
     renderWeeklyGrid();
@@ -325,6 +388,7 @@
         days: [1, 2, 3, 4, 5, 6, 0],
         time: timeStr
       });
+      scheduleLocalNotification(t.mealTitle, timeStr);
     }
     localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
     renderWeeklyGrid();
@@ -353,6 +417,8 @@
       datePlans.push({ id: 'd_' + Date.now(), title, startDate, endDate, time });
       localStorage.setItem('datePlans', JSON.stringify(datePlans));
     }
+
+    scheduleLocalNotification(title, time);
 
     document.getElementById('planTitle').value = '';
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -464,6 +530,50 @@
       dayBody += `</div>`;
       dayCard.innerHTML = dayHeader + dayBody;
       grid.appendChild(dayCard);
+    }
+  }
+
+  function exportData() {
+    const backupData = {
+      weeklyRoutines,
+      datePlans,
+      completedItems
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `planner_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  }
+
+  function importData(event) {
+    const t = translations[currentLang] || translations['tr'];
+    const fileReader = new FileReader();
+    fileReader.onload = function(e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed.weeklyRoutines && parsed.datePlans) {
+          weeklyRoutines = parsed.weeklyRoutines;
+          datePlans = parsed.datePlans;
+          completedItems = parsed.completedItems || {};
+          
+          localStorage.setItem('weeklyRoutines', JSON.stringify(weeklyRoutines));
+          localStorage.setItem('datePlans', JSON.stringify(datePlans));
+          localStorage.setItem('completedItems', JSON.stringify(completedItems));
+          
+          renderWeeklyGrid();
+          alert(t.importSuccess);
+        } else {
+          alert(t.importError);
+        }
+      } catch (err) {
+        alert(t.importError);
+      }
+    };
+    if (event.target.files[0]) {
+      fileReader.readAsText(event.target.files[0]);
     }
   }
 
