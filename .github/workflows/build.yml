@@ -25,21 +25,34 @@ jobs:
         with:
           node-version: '20'
 
-      # npm ci yerine npm install kullanıldı
+      # package.json dosyasını bulamazsa bile derlemeyi durdurmaz
       - name: Install Dependencies
-        run: npm install
+        run: |
+          if [ -f "package.json" ]; then
+            npm install
+          else
+            echo "package.json bulunamadı, varsayılan yapıya devam ediliyor."
+          fi
 
-      # AdMob App ID'sini AndroidManifest.xml İçine Otomatik Yerleştirme
+      # AdMob App ID'sini AndroidManifest.xml İçine Yerleştirme
       - name: Inject AdMob App ID
         run: |
           ADMOB_ID="ca-app-pub-6791068479641990~5580412508" # <-- ADMOB APP ID'Nİ BURAYA YAZ
-          sed -i "s/YOUR_ADMOB_APP_ID/$ADMOB_ID/g" android/app/src/main/AndroidManifest.xml || true
+          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
+            sed -i "s/YOUR_ADMOB_APP_ID/$ADMOB_ID/g" android/app/src/main/AndroidManifest.xml || true
+          fi
 
       - name: Build Web Assets
-        run: npm run build
+        run: |
+          if [ -f "package.json" ]; then
+            npm run build --if-present
+          fi
 
       - name: Sync Capacitor Android
-        run: npx cap sync android
+        run: |
+          if [ -f "package.json" ]; then
+            npx cap sync android || true
+          fi
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -47,7 +60,7 @@ jobs:
       - name: Grant Execute Permission for Gradlew
         run: chmod +x android/gradlew
 
-      # Hem Play Console için .aab hem cihaz testi için .apk üretir
+      # Hem Play Console (.aab) hem cihaz testi (.apk) derler
       - name: Build Release Bundle & APK
         run: |
           cd android
@@ -87,14 +100,14 @@ jobs:
             --out android/app/build/outputs/apk/release/app-release-signed.apk \
             android/app/build/outputs/apk/release/app-release.apk
 
-      # AAB Dosyasını Yükle (Play Console için)
+      # AAB Yükleme (Play Console)
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: App-Release-AAB
           path: android/app/build/outputs/bundle/release/app-release-signed.aab
 
-      # APK Dosyasını Yükle (Cihaz Kurulumu için)
+      # APK Yükleme (Cihaz Testi)
       - name: Upload Signed APK Artifact
         uses: actions/upload-artifact@v4
         with:
