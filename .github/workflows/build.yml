@@ -52,17 +52,18 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # Gradlew izinlerini dinamik ayarlama
-      - name: Grant Execute Permission for Gradlew
-        run: |
-          find . -name "gradlew" -exec chmod +x {} +
-
-      # Hem AAB hem APK derleme
+      # Hem AAB hem APK Derleme (Gradlew Neredeyse Oraya Gidip Çalıştırır)
       - name: Build Release Bundle & APK
         run: |
-          if [ -d "android" ]; then
-            cd android
+          GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+          if [ -z "$GRADLEW_PATH" ]; then
+            echo "HATA: Repoda gradlew dosyası bulunamadı!"
+            exit 1
           fi
+          GRADLEW_DIR=$(dirname "$GRADLEW_PATH")
+          echo "Gradlew klasörü: $GRADLEW_DIR"
+          chmod +x "$GRADLEW_PATH"
+          cd "$GRADLEW_DIR"
           ./gradlew bundleRelease assembleRelease
 
       # Android Keystore Deşifre Etme
@@ -72,7 +73,7 @@ jobs:
           if [ -z "$KEYSTORE_DIR" ]; then KEYSTORE_DIR="android/app"; fi
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$KEYSTORE_DIR/release.keystore"
 
-      # AAB İmzalama (Play Console için)
+      # AAB İmzalama (Google Play için)
       - name: Sign AAB
         run: |
           AAB_FILE=$(find . -name "app-release.aab" | head -n 1)
