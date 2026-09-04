@@ -25,22 +25,17 @@ jobs:
         with:
           node-version: '20'
 
-      # package.json dosyasını bulamazsa bile derlemeyi durdurmaz
       - name: Install Dependencies
         run: |
           if [ -f "package.json" ]; then
             npm install
-          else
-            echo "package.json bulunamadı, varsayılan yapıya devam ediliyor."
           fi
 
-      # AdMob App ID'sini AndroidManifest.xml İçine Yerleştirme
+      # AdMob App ID Inject
       - name: Inject AdMob App ID
         run: |
           ADMOB_ID="ca-app-pub-6791068479641990~5580412508" # <-- ADMOB APP ID'Nİ BURAYA YAZ
-          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
-            sed -i "s/YOUR_ADMOB_APP_ID/$ADMOB_ID/g" android/app/src/main/AndroidManifest.xml || true
-          fi
+          find . -name "AndroidManifest.xml" -exec sed -i "s/YOUR_ADMOB_APP_ID/$ADMOB_ID/g" {} + || true
 
       - name: Build Web Assets
         run: |
@@ -57,59 +52,66 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      # Gradlew izinlerini dinamik ayarlama
       - name: Grant Execute Permission for Gradlew
-        run: chmod +x android/gradlew
+        run: |
+          find . -name "gradlew" -exec chmod +x {} +
 
-      # Hem Play Console (.aab) hem cihaz testi (.apk) derler
+      # Hem AAB hem APK derleme
       - name: Build Release Bundle & APK
         run: |
-          cd android
+          if [ -d "android" ]; then
+            cd android
+          fi
           ./gradlew bundleRelease assembleRelease
 
       # Android Keystore Deşifre Etme
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          KEYSTORE_DIR=$(find . -type d -name "app" | head -n 1)
+          if [ -z "$KEYSTORE_DIR" ]; then KEYSTORE_DIR="android/app"; fi
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$KEYSTORE_DIR/release.keystore"
 
-      # AAB İmzalama (Google Play Console için)
+      # AAB İmzalama (Play Console için)
       - name: Sign AAB
         run: |
+          AAB_FILE=$(find . -name "app-release.aab" | head -n 1)
+          KEYSTORE_FILE=$(find . -name "release.keystore" | head -n 1)
+          OUT_AAB="$(dirname $AAB_FILE)/app-release-signed.aab"
+          
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
-            --ks android/app/release.keystore \
+            --ks "$KEYSTORE_FILE" \
             --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
             --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
             --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            --out android/app/build/outputs/bundle/release/app-release-signed.aab \
-            android/app/build/outputs/bundle/release/app-release.aab
+            --out "$OUT_AAB" \
+            "$AAB_FILE"
 
-      # APK İmzalama (Tabletinde Test Etmek İçin)
+      # APK İmzalama (Tablet Testi için)
       - name: Sign APK
         run: |
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
-            --ks android/app/release.keystore \
-            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
-            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
-            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            --out android/app/build/outputs/apk/release/app-release-signed.apk \
-            android/app/build/outputs/apk/release/app-release-unsigned.apk || \
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
-            --ks android/app/release.keystore \
-            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
-            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
-            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            --out android/app/build/outputs/apk/release/app-release-signed.apk \
-            android/app/build/outputs/apk/release/app-release.apk
+          APK_FILE=$(find . -name "app-release-unsigned.apk" -o -name "app-release.apk" | head -n 1)
+          KEYSTORE_FILE=$(find . -name "release.keystore" | head -n 1)
+          OUT_APK="$(dirname $APK_FILE)/app-release-signed.apk"
 
-      # AAB Yükleme (Play Console)
+          $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
+            --ks "$KEYSTORE_FILE" \
+            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
+            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
+            --out "$OUT_APK" \
+            "$APK_FILE"
+
+      # AAB Artifact Yükleme
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: App-Release-AAB
-          path: android/app/build/outputs/bundle/release/app-release-signed.aab
+          path: "**/app-release-signed.aab"
 
-      # APK Yükleme (Cihaz Testi)
+      # APK Artifact Yükleme
       - name: Upload Signed APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: App-Release-APK
-          path: android/app/build/outputs/apk/release/app-release-signed.apk
+          path: "**/app-release-signed.apk"
