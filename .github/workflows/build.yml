@@ -14,6 +14,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # 1. Proje Dizinini Otomatik Tespit Et
+      - name: Find Project Directory
+        id: proj
+        run: |
+          PKG_PATH=$(find . -maxdepth 3 -name "package.json" | head -n 1)
+          if [ -z "$PKG_PATH" ]; then
+            echo "HATA: package.json bulunamadı!"
+            exit 1
+          fi
+          DIR=$(dirname "$PKG_PATH")
+          echo "PROJECT_DIR=$DIR" >> $GITHUB_ENV
+          echo "Proje dizini: $DIR"
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -25,48 +38,57 @@ jobs:
         with:
           node-version: '20'
 
-      # 1. Bağımlılıkları Yükle
+      # 2. Bağımlılıkları Yükle
       - name: Install Dependencies
-        run: npm install
+        run: |
+          cd ${{ env.PROJECT_DIR }}
+          npm install
 
-      # 2. Web Paketini Derle
+      # 3. Web Paketini Derle
       - name: Build Web Assets
-        run: npm run build --if-present
+        run: |
+          cd ${{ env.PROJECT_DIR }}
+          npm run build --if-present
 
-      # 3. Android Yerel Klasörünü Sunucuda Sıfırdan Üret
+      # 4. Android Yerel Klasörünü Oluştur ve Senkronize Et
       - name: Add and Sync Android Platform
         run: |
+          cd ${{ env.PROJECT_DIR }}
           npx cap add android || true
           npx cap sync android
 
-      # 4. AdMob App ID'sini AndroidManifest.xml İçine Yerleştir
+      # 5. AdMob App ID Inject
       - name: Inject AdMob App ID
         run: |
           ADMOB_ID="ca-app-pub-6791068479641990~5580412508" # <-- ADMOB APP ID'Nİ BURAYA YAZ
-          find android/ -name "AndroidManifest.xml" -exec sed -i "s/YOUR_ADMOB_APP_ID/$ADMOB_ID/g" {} + || true
+          find ${{ env.PROJECT_DIR }}/android/ -name "AndroidManifest.xml" -exec sed -i "s/YOUR_ADMOB_APP_ID/$ADMOB_ID/g" {} + || true
 
-      # 5. Android SDK Ayarla
+      # 6. Android SDK Hazırla
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # 6. Gradlew İzinlerini Ver
+      # 7. Gradlew İzinlerini Ver
       - name: Grant Execute Permission for Gradlew
-        run: chmod +x android/gradlew
+        run: |
+          cd ${{ env.PROJECT_DIR }}/android
+          chmod +x gradlew
 
-      # 7. Hem AAB hem APK Derle
+      # 8. Hem AAB Hem APK Derleme
       - name: Build Release Bundle & APK
         run: |
-          cd android
+          cd ${{ env.PROJECT_DIR }}/android
           ./gradlew bundleRelease assembleRelease
 
-      # 8. Android Keystore Deşifre Et
+      # 9. Android Keystore Deşifre Et
       - name: Decode Keystore
         run: |
+          cd ${{ env.PROJECT_DIR }}
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
 
-      # 9. AAB İmzala (Play Console İçin)
+      # 10. AAB İmzala (Play Console)
       - name: Sign AAB
         run: |
+          cd ${{ env.PROJECT_DIR }}
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
             --ks android/app/release.keystore \
             --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
@@ -75,9 +97,10 @@ jobs:
             --out android/app/build/outputs/bundle/release/app-release-signed.aab \
             android/app/build/outputs/bundle/release/app-release.aab
 
-      # 10. APK İmzala (Tablet Testi İçin)
+      # 11. APK İmzala (Tablet Testi)
       - name: Sign APK
         run: |
+          cd ${{ env.PROJECT_DIR }}
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
             --ks android/app/release.keystore \
             --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
@@ -93,16 +116,16 @@ jobs:
             --out android/app/build/outputs/apk/release/app-release-signed.apk \
             android/app/build/outputs/apk/release/app-release.apk
 
-      # 11. AAB Artifact Yükle
+      # 12. AAB Artifact Yükle
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: App-Release-AAB
-          path: android/app/build/outputs/bundle/release/app-release-signed.aab
+          path: "**/app-release-signed.aab"
 
-      # 12. APK Artifact Yükle
+      # 13. APK Artifact Yükle
       - name: Upload Signed APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: App-Release-APK
-          path: android/app/build/outputs/apk/release/app-release-signed.apk
+          path: "**/app-release-signed.apk"
