@@ -25,8 +25,9 @@ jobs:
         with:
           node-version: '20'
 
+      # npm ci yerine npm install kullanıldı
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       # AdMob App ID'sini AndroidManifest.xml İçine Otomatik Yerleştirme
       - name: Inject AdMob App ID
