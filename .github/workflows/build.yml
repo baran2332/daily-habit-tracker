@@ -14,116 +14,91 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 1. Proje Dizinini Otomatik Tespit Et
-      - name: Find Project Directory
-        id: proj
-        run: |
-          PKG_PATH=$(find . -maxdepth 3 -name "package.json" | head -n 1)
-          if [ -z "$PKG_PATH" ]; then
-            echo "HATA: package.json bulunamadı!"
-            exit 1
-          fi
-          DIR=$(dirname "$PKG_PATH")
-          echo "PROJECT_DIR=$DIR" >> $GITHUB_ENV
-          echo "Proje dizini: $DIR"
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # 2. Bağımlılıkları Yükle
-      - name: Install Dependencies
+      # 1. Proje içindeki gradlew dosyasını bul
+      - name: Locate Gradlew Project
+        id: locate
         run: |
-          cd ${{ env.PROJECT_DIR }}
-          npm install
+          GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+          if [ -z "$GRADLEW_PATH" ]; then
+            echo "HATA: Repoda gradlew dosyası bulunamadı! Lütfen android klasörünü kontrol edin."
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$GRADLEW_PATH")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          echo "Android dizini bulundu: $PROJECT_DIR"
 
-      # 3. Web Paketini Derle
-      - name: Build Web Assets
-        run: |
-          cd ${{ env.PROJECT_DIR }}
-          npm run build --if-present
-
-      # 4. Android Yerel Klasörünü Oluştur ve Senkronize Et
-      - name: Add and Sync Android Platform
-        run: |
-          cd ${{ env.PROJECT_DIR }}
-          npx cap add android || true
-          npx cap sync android
-
-      # 5. AdMob App ID Inject
+      # 2. AdMob App ID Inject
       - name: Inject AdMob App ID
         run: |
           ADMOB_ID="ca-app-pub-6791068479641990~5580412508" # <-- ADMOB APP ID'Nİ BURAYA YAZ
-          find ${{ env.PROJECT_DIR }}/android/ -name "AndroidManifest.xml" -exec sed -i "s/YOUR_ADMOB_APP_ID/$ADMOB_ID/g" {} + || true
+          find ${{ env.PROJECT_DIR }} -name "AndroidManifest.xml" -exec sed -i "s/YOUR_ADMOB_APP_ID/$ADMOB_ID/g" {} + || true
 
-      # 6. Android SDK Hazırla
+      # 3. Android SDK Hazırla
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # 7. Gradlew İzinlerini Ver
+      # 4. Gradlew Çalıştırma İzni Ver
       - name: Grant Execute Permission for Gradlew
         run: |
-          cd ${{ env.PROJECT_DIR }}/android
-          chmod +x gradlew
+          chmod +x ${{ env.PROJECT_DIR }}/gradlew
 
-      # 8. Hem AAB Hem APK Derleme
+      # 5. Hem AAB Hem APK Derleme
       - name: Build Release Bundle & APK
         run: |
-          cd ${{ env.PROJECT_DIR }}/android
+          cd ${{ env.PROJECT_DIR }}
           ./gradlew bundleRelease assembleRelease
 
-      # 9. Android Keystore Deşifre Et
+      # 6. Android Keystore Deşifre Et
       - name: Decode Keystore
         run: |
-          cd ${{ env.PROJECT_DIR }}
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          KEYSTORE_DIR=$(find ${{ env.PROJECT_DIR }} -type d -name "app" | head -n 1)
+          if [ -z "$KEYSTORE_DIR" ]; then KEYSTORE_DIR="${{ env.PROJECT_DIR }}/app"; fi
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$KEYSTORE_DIR/release.keystore"
 
-      # 10. AAB İmzala (Play Console)
+      # 7. AAB İmzala (Google Play için)
       - name: Sign AAB
         run: |
-          cd ${{ env.PROJECT_DIR }}
+          AAB_FILE=$(find ${{ env.PROJECT_DIR }} -name "app-release.aab" -o -name "*-release.aab" | head -n 1)
+          KEYSTORE_FILE=$(find ${{ env.PROJECT_DIR }} -name "release.keystore" | head -n 1)
+          OUT_AAB="$(dirname $AAB_FILE)/app-release-signed.aab"
+          
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
-            --ks android/app/release.keystore \
+            --ks "$KEYSTORE_FILE" \
             --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
             --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
             --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            --out android/app/build/outputs/bundle/release/app-release-signed.aab \
-            android/app/build/outputs/bundle/release/app-release.aab
+            --out "$OUT_AAB" \
+            "$AAB_FILE"
 
-      # 11. APK İmzala (Tablet Testi)
+      # 8. APK İmzala (Tablet Testi için)
       - name: Sign APK
         run: |
-          cd ${{ env.PROJECT_DIR }}
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
-            --ks android/app/release.keystore \
-            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
-            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
-            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            --out android/app/build/outputs/apk/release/app-release-signed.apk \
-            android/app/build/outputs/apk/release/app-release-unsigned.apk || \
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
-            --ks android/app/release.keystore \
-            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
-            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
-            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            --out android/app/build/outputs/apk/release/app-release-signed.apk \
-            android/app/build/outputs/apk/release/app-release.apk
+          APK_FILE=$(find ${{ env.PROJECT_DIR }} -name "app-release-unsigned.apk" -o -name "app-release.apk" -o -name "*-release-unsigned.apk" | head -n 1)
+          KEYSTORE_FILE=$(find ${{ env.PROJECT_DIR }} -name "release.keystore" | head -n 1)
+          OUT_APK="$(dirname $APK_FILE)/app-release-signed.apk"
 
-      # 12. AAB Artifact Yükle
+          $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
+            --ks "$KEYSTORE_FILE" \
+            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
+            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
+            --out "$OUT_APK" \
+            "$APK_FILE"
+
+      # 9. AAB Artifact Yükle
       - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: App-Release-AAB
           path: "**/app-release-signed.aab"
 
-      # 13. APK Artifact Yükle
+      # 10. APK Artifact Yükle
       - name: Upload Signed APK Artifact
         uses: actions/upload-artifact@v4
         with:
